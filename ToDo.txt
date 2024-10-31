@@ -1,0 +1,6 @@
+Templates are not classes
+Create templates in a header file, and then create classes according to it.
+
+Dot
+Transpose
+Convolution
