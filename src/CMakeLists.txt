@@ -2,6 +2,7 @@
 add_executable(${PROJECT_NAME}
     main.cpp
     Matrix.cpp
+    Matrix_CUDA.cu
 )
 
 # Add the include directory to the include path

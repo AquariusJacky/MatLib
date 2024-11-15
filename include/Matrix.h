@@ -1,9 +1,13 @@
-#ifndef TENSOR_H
-#define TENSOR_H
+#ifndef MATRIX_H
+#define MATRIX_H
 
 #include <stdlib.h>
 
 #include <iostream>
+
+namespace CUDA {
+class Matrix;  // class forward declaration
+}
 
 class Matrix {
  private:
@@ -13,11 +17,13 @@ class Matrix {
 
   size_t calculate_index(const size_t& x, const size_t& y) const;
 
- public:
+ public: 
+  friend class CUDA::Matrix;
+
   Matrix();
   Matrix(const size_t& m);
   Matrix(const size_t& m, const size_t& n);
-  Matrix(const Matrix& mat2);
+  Matrix(const Matrix& matB);
   ~Matrix();
 
   size_t m() const { return m_; }
@@ -25,15 +31,16 @@ class Matrix {
   size_t size() const { return m_ * n_; }
 
   float& operator()(const size_t& x, const size_t& y);
-  const float operator()(const size_t& x, const size_t& y) const;
+  const float& operator()(const size_t& x, const size_t& y) const;
 
-  Matrix& operator=(const Matrix& mat2);
-  Matrix& operator+=(const Matrix& mat2);
-  Matrix& operator-=(const Matrix& mat2);
+  Matrix& operator=(const Matrix& matB);
+  Matrix& operator+=(const Matrix& matB);
+  Matrix& operator-=(const Matrix& matB);
   Matrix& operator*=(const float& scale);
-  Matrix operator+(const Matrix& mat2) const;
-  Matrix operator-(const Matrix& mat2) const;
+  Matrix operator+(const Matrix& matB) const;
+  Matrix operator-(const Matrix& matB) const;
   Matrix operator*(const float& scale) const;
+  Matrix& copy(const Matrix& matB);
 
   Matrix& ones();
   Matrix& ones(const size_t& m);
@@ -48,8 +55,11 @@ class Matrix {
   Matrix& identity(const size_t& m) { return (*this).I(m); }
   Matrix& eye(const size_t& m) { return (*this).I(m); }
   Matrix& transpose() { return (*this).T(); }
+  Matrix& abs();
+  Matrix& fabs() { return (*this).abs(); }
+  float sum();
 
-  Matrix& dot(const Matrix& mat2);
+  Matrix& dot(const Matrix& matB);
   Matrix& convolution(const Matrix& mask);
 };
 

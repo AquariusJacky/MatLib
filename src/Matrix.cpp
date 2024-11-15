@@ -1,15 +1,16 @@
 #include "Matrix.h"
 
+#include <cmath>
 #include <iostream>
 
 size_t Matrix::calculate_index(const size_t& x, const size_t& y) const {
-  return y * n_ + x;
+  return x * n_ + y;
 }
 
 Matrix::Matrix() {
   m_ = 0;
   n_ = 0;
-  data_ = NULL;
+  data_ = nullptr;
 }
 
 Matrix::Matrix(const size_t& m) {
@@ -23,16 +24,16 @@ Matrix::Matrix(const size_t& m, const size_t& n) {
   m_ = m;
   n_ = n;
   data_ = new float[m * n];
-  for (size_t i = 0; i < m * n; i++) data_[i] = 1.0f;
+  for (size_t i = 0; i < m * n; i++) data_[i] = 0.0f;
 }
 
-Matrix::Matrix(const Matrix& mat2) {
-  m_ = mat2.m();
-  n_ = mat2.n();
+Matrix::Matrix(const Matrix& matB) {
+  m_ = matB.m();
+  n_ = matB.n();
   data_ = new float[m_ * n_];
   for (size_t i = 0; i < m_; i++) {
     for (size_t j = 0; j < n_; j++) {
-      (*this)(j, i) = mat2(j, i);
+      (*this)(i, j) = matB(i, j);
     }
   }
 }
@@ -43,51 +44,41 @@ float& Matrix::operator()(const size_t& x, const size_t& y) {
   return data_[calculate_index(x, y)];
 }
 
-const float Matrix::operator()(const size_t& x, const size_t& y) const {
+const float& Matrix::operator()(const size_t& x, const size_t& y) const {
   return data_[calculate_index(x, y)];
 }
 
-Matrix& Matrix::operator=(const Matrix& mat2) {
+Matrix& Matrix::operator=(const Matrix& matB) {
   delete[] data_;
-  m_ = n_ = 0;
+  m_ = matB.m_;
+  n_ = matB.n_;
+  data_ = new float[m_ * n_];
+  for (size_t i = 0; i < m_ * n_; i++) data_[i] = matB.data_[i];
+  return (*this);
+}
 
-  if (mat2.size() <= 0) return (*this);
-
-  data_ = new float[mat2.size()];
-  m_ = mat2.m();
-  n_ = mat2.n();
+Matrix& Matrix::operator+=(const Matrix& matB) {
+  if (m_ != matB.m_ || n_ != matB.n_) {
+    return (*this);  // Or implement error handling as needed
+  }
 
   for (size_t i = 0; i < m_; i++) {
     for (size_t j = 0; j < n_; j++) {
-      (*this)(j, i) = mat2(j, i);
+      (*this)(i, j) += matB(i, j);
     }
   }
 
   return (*this);
 }
 
-Matrix& Matrix::operator+=(const Matrix& mat2) {
-  if (m_ != mat2.m_ || n_ != mat2.n_) {
+Matrix& Matrix::operator-=(const Matrix& matB) {
+  if (m_ != matB.m_ || n_ != matB.n_) {
     return (*this);  // Or implement error handling as needed
   }
 
   for (size_t i = 0; i < m_; i++) {
     for (size_t j = 0; j < n_; j++) {
-      (*this)(j, i) += mat2(j, i);
-    }
-  }
-
-  return (*this);
-}
-
-Matrix& Matrix::operator-=(const Matrix& mat2) {
-  if (m_ != mat2.m_ || n_ != mat2.n_) {
-    return (*this);  // Or implement error handling as needed
-  }
-
-  for (size_t i = 0; i < m_; i++) {
-    for (size_t j = 0; j < n_; j++) {
-      (*this)(j, i) -= mat2(j, i);
+      (*this)(i, j) -= matB(i, j);
     }
   }
 
@@ -97,22 +88,22 @@ Matrix& Matrix::operator-=(const Matrix& mat2) {
 Matrix& Matrix::operator*=(const float& scale) {
   for (size_t i = 0; i < m_; i++) {
     for (size_t j = 0; j < n_; j++) {
-      (*this)(j, i) *= scale;
+      (*this)(i, j) *= scale;
     }
   }
 
   return (*this);
 }
 
-Matrix Matrix::operator+(const Matrix& mat2) const {
+Matrix Matrix::operator+(const Matrix& matB) const {
   Matrix result(*this);
-  result += mat2;
+  result += matB;
   return result;
 }
 
-Matrix Matrix::operator-(const Matrix& mat2) const {
+Matrix Matrix::operator-(const Matrix& matB) const {
   Matrix result(*this);
-  result += mat2;
+  result -= matB;
   return result;
 }
 
@@ -120,6 +111,25 @@ Matrix Matrix::operator*(const float& scale) const {
   Matrix result(*this);
   result *= scale;
   return result;
+}
+
+Matrix& Matrix::copy(const Matrix& matB) {
+  delete[] data_;
+  m_ = n_ = 0;
+
+  if (matB.size() <= 0) return (*this);
+
+  data_ = new float[matB.size()];
+  m_ = matB.m();
+  n_ = matB.n();
+
+  for (size_t i = 0; i < m_; i++) {
+    for (size_t j = 0; j < n_; j++) {
+      (*this)(i, j) = matB(i, j);
+    }
+  }
+
+  return (*this);
 }
 
 Matrix& Matrix::fill(const float& val) {
@@ -140,7 +150,7 @@ Matrix& Matrix::I(const size_t& m) {
 
   for (size_t i = 0; i < m; i++) {
     for (size_t j = 0; j < m; j++) {
-      Imat(j, i) = ((i == j) ? 1.0f : 0.0f);
+      Imat(i, j) = ((i == j) ? 1.0f : 0.0f);
     }
   }
 
@@ -152,7 +162,7 @@ Matrix& Matrix::T() {
 
   for (size_t i = 0; i < m_; i++) {
     for (size_t j = 0; j < n_; j++) {
-      (*this)(i, j) = result(j, i);
+      (*this)(j, i) = result(i, j);
     }
   }
 
@@ -193,23 +203,37 @@ Matrix& Matrix::zeros(const size_t& m, const size_t& n) {
   return (*this) = mat;
 }
 
-Matrix& Matrix::dot(const Matrix& mat2) {
+Matrix& Matrix::abs() {
+  for (size_t i = 0; i < m_ * n_; i++)
+    data_[i] = data_[i] >= 0 ? data_[i] : data_[i] * -1;
+
+  return (*this);
+}
+
+float Matrix::sum() {
+  float sum = 0;
+  for (size_t i = 0; i < m_ * n_; i++) sum += data_[i];
+
+  return sum;
+}
+
+Matrix& Matrix::dot(const Matrix& matB) {
   // Create error handlers
   if (!data_) return (*this);
-  if (!mat2.data_) return (*this);
-  if (n_ != mat2.m_) {
+  if (!matB.data_) return (*this);
+  if (n_ != matB.m_) {
     return *this;
   }
 
-  Matrix result(m_, mat2.n_);
+  Matrix result(m_, matB.n_);
 
   for (size_t i = 0; i < m_; i++) {
-    for (size_t j = 0; j < mat2.n_; j++) {
+    for (size_t j = 0; j < matB.n_; j++) {
       float sum = 0;
-      for (size_t k = 0; k < mat2.m_; k++) {
-        sum += (*this)(k, i) * mat2(j, k);
+      for (size_t k = 0; k < matB.m_; k++) {
+        sum += (*this)(i, k) * matB(k, j);
       }
-      result(j, i) = sum;
+      result(i, j) = sum;
     }
   }
 
@@ -231,31 +255,30 @@ Matrix& Matrix::convolution(const Matrix& mask) {
       float sum = 0;
       for (size_t ii = 0; ii < mask.m(); ii++) {
         for (size_t jj = 0; jj < mask.m(); jj++) {
-          sum += (*this)(j + jj, i + ii) * mask(jj, ii);
+          sum += (*this)(i + ii, j + jj) * mask(ii, jj);
         }
       }
-      result(j, i) = sum;
+      result(i, j) = sum;
     }
   }
 
   return (*this) = result;
 }
 
-// outside Matrix class
 std::ostream& operator<<(std::ostream& os, const Matrix& mat) {
   for (size_t i = 0; i < mat.m() - 1; i++) {
     os << (i == 0 ? "[[" : " [");
     for (size_t j = 0; j < mat.n() - 1; j++) {
-      os << mat(j, i) << ", ";
+      os << mat(i, j) << ", ";
     }
-    os << mat(mat.n() - 1, i) << "]\n";
+    os << mat(i, mat.n() - 1) << "]\n";
   }
 
   os << " [";
   for (size_t j = 0; j < mat.n() - 1; j++) {
-    os << mat(j, mat.m() - 1) << ", ";
+    os << mat(mat.m() - 1, j) << ", ";
   }
-  os << mat(mat.n() - 1, mat.m() - 1) << "]";
+  os << mat(mat.m() - 1, mat.n() - 1) << "]";
   os << "]\n";
 
   return os;
