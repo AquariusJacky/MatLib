@@ -1,5 +1,13 @@
-# Matrix
+# CUDAMatrix
 A library that performs Matrix arithmetic that performs CUDA optimization 
+
+# Run
+```
+mkdir build
+cmake ..
+make
+./bin/CUDAMatrix
+```
 
 CUDA doesn't support gcc13 at the time being (11/2 2024), so I had to do this:
 ```
