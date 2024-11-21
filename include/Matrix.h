@@ -17,7 +17,7 @@ class Matrix {
 
   size_t calculate_index(const size_t& x, const size_t& y) const;
 
- public: 
+ public:
   friend class CUDA::Matrix;
 
   Matrix();
@@ -55,8 +55,9 @@ class Matrix {
   Matrix& identity(const size_t& m) { return (*this).I(m); }
   Matrix& eye(const size_t& m) { return (*this).I(m); }
   Matrix& transpose() { return (*this).T(); }
-  Matrix& abs();
-  Matrix& fabs() { return (*this).abs(); }
+  Matrix& abs();                            // Absolute
+  Matrix& fabs() { return (*this).abs(); }  // Floating point absolute
+  Matrix& power(const float& power);        // Only works with square matrix
   float sum();
 
   Matrix& dot(const Matrix& matB);

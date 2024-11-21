@@ -34,9 +34,9 @@ class Matrix {
   // CUDA Operations
   void fill(const float& val);
   Matrix& add(const Matrix& matB);
-  Matrix dot(const Matrix& matB);
-  void scale(float scalar);
-  void convolution(const Matrix& mask, Matrix& result);
+  Matrix& dot(const Matrix& matB);
+  Matrix& scale(float scalar);
+  Matrix& convolution(const Matrix& mask);
 };
 
 }  // namespace CUDA
