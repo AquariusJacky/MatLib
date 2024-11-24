@@ -1,7 +1,16 @@
 Templates are not classes
 Create templates in a header file, and then create classes according to it.
 
+arange
+random
+
+col
+cols
+row
+rows
+submatrix
+
 Dot
 Transpose
 Convolution
-Power
+Matrix Power

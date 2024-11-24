@@ -14,7 +14,6 @@ class Matrix {
   size_t m_;
   size_t n_;
   float* data_;  // Stores the actual data in row-major order
-
   size_t calculate_index(const size_t& x, const size_t& y) const;
 
  public:
@@ -40,7 +39,12 @@ class Matrix {
   Matrix operator+(const Matrix& matB) const;
   Matrix operator-(const Matrix& matB) const;
   Matrix operator*(const float& scale) const;
-  Matrix& copy(const Matrix& matB);
+  Matrix& copy(const Matrix& matB) { return (*this) = matB; }
+
+  Matrix& reshape(const size_t& m);
+  Matrix& reshape(const size_t& m, const size_t& n);
+  Matrix& resize(const size_t& m);
+  Matrix& resize(const size_t& m, const size_t& n);
 
   Matrix& ones();
   Matrix& ones(const size_t& m);
@@ -48,6 +52,10 @@ class Matrix {
   Matrix& zeros();
   Matrix& zeros(const size_t& m);
   Matrix& zeros(const size_t& m, const size_t& n);
+
+  Matrix& arange(const float& end);
+  Matrix& arange(const float& start, const float& end);
+  Matrix& arange(const float& start, const float& end, const float& step);
 
   Matrix& fill(const float& val);
   Matrix& I(const size_t& m);
@@ -57,7 +65,8 @@ class Matrix {
   Matrix& transpose() { return (*this).T(); }
   Matrix& abs();                            // Absolute
   Matrix& fabs() { return (*this).abs(); }  // Floating point absolute
-  Matrix& power(const float& power);        // Only works with square matrix
+  // Only works with square matrix, matrix self dot
+  Matrix& power(const float& power);
   float sum();
 
   Matrix& dot(const Matrix& matB);

@@ -113,16 +113,30 @@ void MatrixTester::printError(const int& testerAID, const int& testerBID) {
   if (isValidTesterID(testerAID) == 0 || isValidTesterID(testerBID) == 0)
     return;
 
-  Matrix matA = testerVec[testerAID]->result();
-  Matrix matB = testerVec[testerBID]->result();
-  if (matA.m() != matB.m() || matA.n() != matB.n()) {
-    std::cout << "Matrix dimensions do not match" << std::endl;
-  }
-  Matrix diff = matA - matB;
-  float error = diff.sum();
+  RunningUnit* test1 = testerVec[testerAID];
+  RunningUnit* test2 = testerVec[testerBID];
 
-  std::cout << "Error between " << testerVec[testerAID]->name() << " and "
-            << testerVec[testerBID]->name() << ": " << error << std::endl;
+  if (test1->result_type != test2->result_type) {
+    throw std::logic_error("The result type of test 1 and 2 don't match");
+  }
+
+  float error;
+  if (test1->result_type == RunningUnit::Result::MATRIX) {
+    Matrix matA = test1->result();
+    Matrix matB = test2->result();
+    if (matA.m() != matB.m() || matA.n() != matB.n()) {
+      std::cout << "Matrix dimensions do not match" << std::endl;
+    }
+    Matrix diff = matA - matB;
+    error = diff.sum();
+  } else {
+    float valA = test1->result_value;
+    float valB = test2->result_value;
+    error = ((valA >= valB) ? (valA - valB) : (valB - valA));
+  }
+
+  std::cout << "Error between \"" << testerVec[testerAID]->name() << "\" and \""
+            << testerVec[testerBID]->name() << "\": " << error << std::endl;
 }
 
 void MatrixTester::printTime(const int& testerID) {

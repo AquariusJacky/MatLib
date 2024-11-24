@@ -10,7 +10,6 @@
 #include "Matrix_CUDA.cuh"
 
 enum {
-  UNKNOWN = 0,
 
   // Unary operation
   ZEROS,
@@ -29,11 +28,13 @@ enum {
   DOT,
   CONVOLUTION,
 
-  TOTAL_OPERATION
+  TOTAL_OPERATION,
+  UNKNOWN
 };
 
 class RunningUnit {
  public:
+  friend class MatrixTester;
   RunningUnit();
   ~RunningUnit();
 
@@ -60,6 +61,11 @@ class RunningUnit {
   bool useCUDA;
 
   bool ran;
+  int result_type;
+  enum Result {
+    MATRIX,
+    VALUE,
+  };
   Matrix result_matrix;
   float result_value;
 
