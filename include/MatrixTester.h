@@ -22,6 +22,7 @@ enum {
   FILL,
   IDENTITY,
   SCALE,
+  MAXPOOLING,
 
   // Binary operation with matrix
   ADD,
@@ -117,6 +118,7 @@ class MatrixTester {
         {"fill", FILL},
         {"identity", IDENTITY},
         {"scale", SCALE},
+        {"maxPooling", MAXPOOLING},
 
         {"addition", ADD},
         {"dot", DOT},

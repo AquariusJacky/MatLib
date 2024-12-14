@@ -1,6 +1,7 @@
 Templates are not classes
 Create templates in a header file, and then create classes according to it.
 
+11/24 week
 arange
 random
 
@@ -9,8 +10,15 @@ cols
 row
 rows
 submatrix
+concatenate
+flip
+rotate
 
+pooling
+
+### Normalization
+
+#####################
 Dot
-Transpose
 Convolution
 Matrix Power

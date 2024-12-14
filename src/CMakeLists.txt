@@ -6,6 +6,10 @@ add_executable(${PROJECT_NAME}
     
     MatrixTester.cpp
     RunningUnit.cpp
+
+    ModelInterface.cpp
+    ConvLayer.cpp
+    ReLULayer.cpp
 )
 
 # Add the include directory to the include path

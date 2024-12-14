@@ -37,6 +37,7 @@ class Matrix {
   Matrix& dot(const Matrix& matB);
   Matrix& scale(float scalar);
   Matrix& convolution(const Matrix& mask);
+  Matrix& maxPooling(const size_t& size);
 };
 
 }  // namespace CUDA

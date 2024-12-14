@@ -38,7 +38,7 @@ int RunningUnit::init(const std::string& name, const int& operation_id,
 int RunningUnit::init(const std::string& name, const int& operation_id,
                       const Matrix& mat, const float& val, const bool& isCUDA) {
   if (operation_id != FILL && operation_id != SCALE &&
-      operation_id != IDENTITY) {
+      operation_id != IDENTITY && operation_id != MAXPOOLING) {
     std::cout << "In " << test_name << ", the number of inputs is incorrect."
               << std::endl;
     return 1;
@@ -164,6 +164,11 @@ void RunningUnit::run_cpu() {
       result_matrix *= operation_value;
       end_time = std::chrono::high_resolution_clock::now();
       break;
+    case MAXPOOLING:
+      start_time = std::chrono::high_resolution_clock::now();
+      result_matrix.maxPooling(operation_value);
+      end_time = std::chrono::high_resolution_clock::now();
+      break;
     case ADD:
       start_time = std::chrono::high_resolution_clock::now();
       result_matrix += input_matrices[1];
@@ -176,7 +181,8 @@ void RunningUnit::run_cpu() {
       break;
     case CONVOLUTION:
       start_time = std::chrono::high_resolution_clock::now();
-      result_matrix.convolution(input_matrices[1]);
+      result_matrix.convolution(input_matrices[1], 1,
+                                Matrix::PaddingType::ZERO);
       end_time = std::chrono::high_resolution_clock::now();
       break;
   }
@@ -236,11 +242,18 @@ void RunningUnit::run_gpu() {
       gpu_mat.toCPU(result_matrix);
       end_time = std::chrono::high_resolution_clock::now();
     } break;
-    case SCALE: {
-      std::chrono::high_resolution_clock::now();
-      CUDA::Matrix gpu_mat(input_matrices[0]);
-      gpu_mat.scale(operation_value);
-      gpu_mat.toCPU(result_matrix);
+    // case SCALE: {
+    //   std::chrono::high_resolution_clock::now();
+    //   CUDA::Matrix gpu_mat(input_matrices[0]);
+    //   gpu_mat.scale(operation_value);
+    //   gpu_mat.toCPU(result_matrix);
+    //   end_time = std::chrono::high_resolution_clock::now();
+    // } break;
+    case MAXPOOLING: {
+      start_time = std::chrono::high_resolution_clock::now();
+      CUDA::Matrix gpu_input_matA(input_matrices[0]);
+      gpu_input_matA.maxPooling(operation_value);
+      gpu_input_matA.toCPU(result_matrix);
       end_time = std::chrono::high_resolution_clock::now();
     } break;
     case ADD: {

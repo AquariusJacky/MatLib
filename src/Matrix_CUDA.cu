@@ -141,7 +141,7 @@ Matrix& Matrix::add(const Matrix& matB) {
   size_t m = m_, n = n_;
 
   if (matB.m_ != m || matB.n_ != n) {
-    throw std::logic_error("Size of A does not match size of B");
+    throw std::runtime_error("Size of A does not match size of B");
   }
 
   // Set up grid and block dimensions
@@ -186,7 +186,7 @@ Matrix& Matrix::dot(const Matrix& matB) {
   size_t m = m_, k = n_, n = matB.n_;
 
   if (matB.m_ != k) {
-    throw std::logic_error("Col # of A doesn't match Row # of B");
+    throw std::runtime_error("Col # of A doesn't match Row # of B");
   }
 
   Matrix result(m, n);
@@ -237,7 +237,7 @@ Matrix& Matrix::convolution(const Matrix& mask) {
   size_t m = m_, n = n_, k = mask.m_;
 
   if (mask.n_ != k) {
-    throw std::logic_error("Mask is not a square matrix");
+    throw std::runtime_error("Mask is not a square matrix");
   }
 
   size_t out_m = m - k + 1;
@@ -253,6 +253,56 @@ Matrix& Matrix::convolution(const Matrix& mask) {
   // Launch kernel
   convolutionKernel<<<gridDim, blockDim>>>(d_data, mask.d_data, result.d_data,
                                            m, n, k);
+
+  // Check for errors
+  cudaError_t status = cudaGetLastError();
+  if (status != cudaSuccess) {
+    throw std::runtime_error("Kernel launch failed");
+  }
+
+  // Synchronize
+  cudaDeviceSynchronize();
+
+  return (*this) = result;
+}
+
+// Example CUDA kernel for matrix multiplication
+__global__ void maxPoolingKernel(const float* A, float* output, size_t m,
+                                 size_t n, size_t size) {
+  size_t row = blockIdx.x * blockDim.x + threadIdx.x;
+  size_t col = blockIdx.y * blockDim.y + threadIdx.y;
+
+  size_t out_m = m / size;
+  size_t out_n = n / size;
+
+  if (row < out_m && col < out_n) {
+    float max_num = A[(row * size) * n + (col * size)];
+    for (size_t i = 0; i < size; i++) {
+      for (size_t j = 0; j < size; j++) {
+        float curr_num = A[((row * size) + i) * n + (col * size) + j]; 
+        if (curr_num > max_num) max_num = curr_num;
+      }
+    }
+    output[row * out_n + col] = max_num;
+  }
+  __syncthreads();
+}
+
+Matrix& Matrix::maxPooling(const size_t& size) {
+  size_t m = m_, n = n_;
+
+  size_t out_m = m_ / size;
+  size_t out_n = n_ / size;
+
+  Matrix result(out_m, out_n);
+
+  // Set up grid and block dimensions
+  dim3 blockDim(BLOCK_SIZE, BLOCK_SIZE);
+  dim3 gridDim((out_m + blockDim.x - 1) / (blockDim.x * 1.0),
+               (out_n + blockDim.y - 1) / (blockDim.y * 1.0));
+
+  // Launch kernel
+  maxPoolingKernel<<<gridDim, blockDim>>>(d_data, result.d_data, m, n, size);
 
   // Check for errors
   cudaError_t status = cudaGetLastError();

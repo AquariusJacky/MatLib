@@ -9,6 +9,21 @@ namespace CUDA {
 class Matrix;  // class forward declaration
 }
 
+struct MatrixSize {
+  size_t m;
+  size_t n;
+
+  MatrixSize(size_t _n) {
+    m = 1;
+    n = _n;
+  }
+  MatrixSize(size_t _m, size_t _n) {
+    m = _m;
+    n = _n;
+  }
+  ~MatrixSize() {}
+};
+
 class Matrix {
  private:
   size_t m_;
@@ -17,10 +32,13 @@ class Matrix {
   size_t calculate_index(const size_t& x, const size_t& y) const;
 
  public:
+  enum PaddingType { NONE, FULL };
+
+ public:
   friend class CUDA::Matrix;
 
   Matrix();
-  Matrix(const size_t& m);
+  Matrix(const size_t& n);
   Matrix(const size_t& m, const size_t& n);
   Matrix(const Matrix& matB);
   ~Matrix();
@@ -41,27 +59,33 @@ class Matrix {
   Matrix operator*(const float& scale) const;
   Matrix& copy(const Matrix& matB) { return (*this) = matB; }
 
-  Matrix& reshape(const size_t& m);
+  Matrix& reshape(const size_t& n);
   Matrix& reshape(const size_t& m, const size_t& n);
-  Matrix& resize(const size_t& m);
+  Matrix& resize(const size_t& n);
   Matrix& resize(const size_t& m, const size_t& n);
+  Matrix& resize(const MatrixSize& sz);
 
   Matrix& ones();
-  Matrix& ones(const size_t& m);
+  Matrix& ones(const size_t& n);
   Matrix& ones(const size_t& m, const size_t& n);
+  Matrix& ones(const MatrixSize& sz);
   Matrix& zeros();
-  Matrix& zeros(const size_t& m);
+  Matrix& zeros(const size_t& n);
   Matrix& zeros(const size_t& m, const size_t& n);
+  Matrix& zeros(const MatrixSize& sz);
 
   Matrix& arange(const float& end);
   Matrix& arange(const float& start, const float& end);
   Matrix& arange(const float& start, const float& end, const float& step);
+  Matrix& rand(const float& lower_limit, const float& lower_limit);
 
   Matrix& fill(const float& val);
-  Matrix& I(const size_t& m);
+  Matrix& I(const size_t& sz);
   Matrix& T();
-  Matrix& identity(const size_t& m) { return (*this).I(m); }
-  Matrix& eye(const size_t& m) { return (*this).I(m); }
+  Matrix& flip(const size_t& axis);  // 0 for column, 1 for row
+  Matrix& rotate90(const size_t& k);
+  Matrix& identity(const size_t& sz) { return (*this).I(sz); }
+  Matrix& eye(const size_t& n) { return (*this).I(n); }
   Matrix& transpose() { return (*this).T(); }
   Matrix& abs();                            // Absolute
   Matrix& fabs() { return (*this).abs(); }  // Floating point absolute
@@ -69,8 +93,22 @@ class Matrix {
   Matrix& power(const float& power);
   float sum();
 
+  Matrix col(const size_t& col_num);
+  Matrix cols(const size_t& col_start, const size_t& col_end);
+  Matrix row(const size_t& row_num);
+  Matrix rows(const size_t& row_start, const size_t& row_end);
+  Matrix submatrix(const size_t& row_start, const size_t& row_end,
+                   const size_t& col_start, const size_t& col_end);
+
+  Matrix& concatenate(const Matrix& matB, const size_t& axis);
+
   Matrix& dot(const Matrix& matB);
   Matrix& convolution(const Matrix& mask);
+  Matrix& convolution(const Matrix& mask, const size_t& stride);
+  Matrix& convolution(const Matrix& mask, const size_t& stride,
+                      const PaddingType& padding_type);
+
+  Matrix& maxPooling(const size_t& size);
 };
 
 std::ostream& operator<<(std::ostream&, const Matrix&);

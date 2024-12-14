@@ -117,7 +117,7 @@ void MatrixTester::printError(const int& testerAID, const int& testerBID) {
   RunningUnit* test2 = testerVec[testerBID];
 
   if (test1->result_type != test2->result_type) {
-    throw std::logic_error("The result type of test 1 and 2 don't match");
+    throw std::runtime_error("The result type of test 1 and 2 don't match");
   }
 
   float error;
