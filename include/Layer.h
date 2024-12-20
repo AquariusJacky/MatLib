@@ -20,51 +20,83 @@ class Layer {
 
 class ReLULayer : public Layer {
  private:
-  // Store the last input for backward pass
-  Matrix lastInput;
+  size_t numInput;
   MatrixSize inputSize;
 
+  // Weights (weights)
+  std::vector<Matrix> layerInput;
+  std::vector<Matrix> layerOutput;
+
+  std::vector<Matrix> inputGradient;
+
  public:
-  ReLULayer(const MatrixSize& inputSize) : inputSize(inputSize) {}
+  ReLULayer(const size_t& numInput, const MatrixSize& inputSize);
 
   std::vector<Matrix> forward(const std::vector<Matrix>& input) override;
   std::vector<Matrix> backward(const std::vector<Matrix>& gradOutput) override;
   MatrixSize getOutputSize() const override;
+
+ private:
+  void init();
 };
 
 class ConvLayer : public Layer {
  private:
-  size_t inputChannel;
-  size_t outputChannel;
+  size_t numInput;
+  size_t numWeight;
   MatrixSize inputSize;
-  MatrixSize filterSize;
-  int stride;
+  MatrixSize weightSize;
+  size_t stride;
 
-  // Filters (weights)
-  std::vector<Matrix> filters;
+  // Weights (weights)
+  std::vector<Matrix> weights;
   std::vector<Matrix> layerInput;
   std::vector<Matrix> layerOutput;
 
-  std::vector<Matrix> filterGradient;
+  std::vector<Matrix> weightGradient;
+  std::vector<Matrix> inputGradient;
 
  public:
-  ConvLayer(const size_t& inputChannel, const size_t& outputChannel,
-            const MatrixSize& inputSize, const MatrixSize& filterSize,
+  ConvLayer(const size_t& numInput, const size_t& num_weight,
+            const MatrixSize& inputSize, const MatrixSize& weightSize,
             size_t stride);
 
-  void initializeParameters();
-  void randomInitialize(Matrix& matrix);
   std::vector<Matrix> forward(const std::vector<Matrix>& input) override;
   std::vector<Matrix> backward(const std::vector<Matrix>& gradOutput) override;
   MatrixSize getOutputSize() const override;
 
  private:
-  Matrix computeInputGradient(const Matrix& gradOutput);
-  void updateParameters(const Matrix& gradOutput);
+  void init();
+  void updateWeight();
 };
 
+// Fully connected layer (FCN)
 class DenseLayer : public Layer {
-  // Similar structure to ConvLayer, but for fully connected layers
+ private:
+  MatrixSize inputSize;
+  MatrixSize outputSize;
+
+  // Weights (weights)
+  std::vector<Matrix> weight;
+  std::vector<Matrix> bias;
+  std::vector<Matrix> layerInput;
+  std::vector<Matrix> layerOutput;
+
+  std::vector<Matrix> weightGradient;
+  std::vector<Matrix> biasGradient;
+  std::vector<Matrix> inputGradient;
+
+ public:
+  DenseLayer(const MatrixSize& inputSize, const MatrixSize& outputSize);
+  DenseLayer(const size_t& inputSize, const size_t& outputSize);
+
+  std::vector<Matrix> forward(const std::vector<Matrix>& input) override;
+  std::vector<Matrix> backward(const std::vector<Matrix>& gradOutput) override;
+  MatrixSize getOutputSize() const override;
+
+ private:
+  void init();
+  void updateWeight();
 };
 
 #endif

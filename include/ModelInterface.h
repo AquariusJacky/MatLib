@@ -21,34 +21,32 @@ class Model {
   }
 
   Matrix predict(const Matrix& input) {
-    Matrix currentInput = input;
+    std::vector<Matrix> matrixVec(1, input);
     for (auto& layer : layers) {
-      currentInput = layer->forward(currentInput);
+      matrixVec = layer->forward(matrixVec);
     }
-    return currentInput;
+    return matrixVec[0];
   }
 
   void train(const Matrix& input, const Matrix& target) {
+    size_t layer_num = layers.size();
+
     // Forward pass
-    std::vector<Matrix> layerOutputs;
-    Matrix currentInput = input;
-    for (auto& layer : layers) {
-      currentInput = layer->forward(currentInput);
-      layerOutputs.push_back(currentInput);
+    std::vector<Matrix> matrixVec(1, input);
+    for (size_t i = 0; i < layer_num; i++) {
+      matrixVec = layers[i]->forward(matrixVec);
     }
 
     // Backward pass (backpropagation)
-    Matrix gradient = computeInitialGradient(currentInput, target);
-    for (auto it = layers.rbegin(); it != layers.rend(); ++it) {
-      gradient = (*it)->backward(gradient);
+    std::vector<Matrix> gradientVec(1, computeGradient(matrixVec[0], target));
+    for (size_t i = layer_num - 1; i >= 0; i--) {
+      gradientVec = layers[i]->backward(gradientVec);
     }
   }
 
  private:
-  Matrix computeInitialGradient(const Matrix& prediction,
-                                const Matrix& target) {
-    // Compute initial gradient based on loss function
-    // For example, mean squared error
+  Matrix computeGradient(const Matrix& prediction, const Matrix& target) {
+    // Cross Entropy
     return prediction - target;
   }
 };

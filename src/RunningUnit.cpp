@@ -182,7 +182,7 @@ void RunningUnit::run_cpu() {
     case CONVOLUTION:
       start_time = std::chrono::high_resolution_clock::now();
       result_matrix.convolution(input_matrices[1], 1,
-                                Matrix::PaddingType::ZERO);
+                                Matrix::PaddingType::FULL);
       end_time = std::chrono::high_resolution_clock::now();
       break;
   }

@@ -57,7 +57,7 @@ class Matrix {
   Matrix operator+(const Matrix& matB) const;
   Matrix operator-(const Matrix& matB) const;
   Matrix operator*(const float& scale) const;
-  Matrix& copy(const Matrix& matB) { return (*this) = matB; }
+  Matrix copy() const { return (*this); }
 
   Matrix& reshape(const size_t& n);
   Matrix& reshape(const size_t& m, const size_t& n);
@@ -77,7 +77,7 @@ class Matrix {
   Matrix& arange(const float& end);
   Matrix& arange(const float& start, const float& end);
   Matrix& arange(const float& start, const float& end, const float& step);
-  Matrix& rand(const float& lower_limit, const float& lower_limit);
+  Matrix& rand(const float& lower_limit, const float& upper_limit);
 
   Matrix& fill(const float& val);
   Matrix& I(const size_t& sz);

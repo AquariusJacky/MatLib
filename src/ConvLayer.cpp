@@ -1,29 +1,32 @@
 #include "Layer.h"
 #include "Matrix.h"
 
-ConvLayer::ConvLayer(const size_t& inputChannel, const size_t& outputChannel,
-                     const MatrixSize& inputSize, const MatrixSize& filterSize,
+ConvLayer::ConvLayer(const size_t& numInput, const size_t& numWeight,
+                     const MatrixSize& inputSize, const MatrixSize& weightSize,
                      size_t stride = 1)
     : inputSize(inputSize),
-      filterSize(filterSize),
-      inputChannel(inputChannel),
-      outputChannel(outputChannel),
+      weightSize(weightSize),
+      numInput(numInput),
+      numWeight(numWeight),
       stride(stride) {
-  // Initialize filters and biases with random values
-  initializeParameters();
+  // Initialize weights and biases with random values
+  init();
 }
 
-void ConvLayer::initializeParameters() {
-  float rand_limit;
+void ConvLayer::init() {
+  float rand_limit = 10000;
 
-  // Initialize filters with random values
-  for (int i = 0; i < outputChannel; ++i) {
-    filters.push_back(Matrix(filterSize.m, filterSize.n));
+  // Initialize weights with random values
+  for (size_t i = 0; i < numWeight; ++i) {
+    weights.push_back(Matrix(weightSize.m, weightSize.n));
 
     // May use some initialization strategy (e.g., Xavier/Glorot)
-    filters[i].rand(rand_limit * -1, rand_limit);
+    weights[i].rand(rand_limit * -1, rand_limit);
   }
-  layerOutput = std::vector<Matrix>(outputChannel);
+  layerOutput = std::vector<Matrix>(numInput * numWeight);
+
+  inputGradient = std::vector<Matrix>(numInput);
+  weightGradient = std::vector<Matrix>(numWeight);
 }
 
 std::vector<Matrix> ConvLayer::forward(const std::vector<Matrix>& input) {
@@ -31,85 +34,63 @@ std::vector<Matrix> ConvLayer::forward(const std::vector<Matrix>& input) {
     throw std::runtime_error("Input is empty");
   }
   if (input[0].m() != inputSize.m || input[0].n() != inputSize.n) {
-    throw std::runtime_error("Input size incorrect in ConvLayer forward");
+    throw std::runtime_error("Input size incorrect for ConvLayer forward");
   }
 
   // Store input for backward pass
   layerInput = input;
 
-  // Apply each filter to the input
-  for (size_t channel = 0; channel < inputChannel; channel++) {
-    for (size_t filter_num = 0; filter_num < outputChannel; filter_num++) {
-      size_t curr_output = channel * inputChannel + filter_num;
+  // Apply each weight to the input
+  for (size_t channel = 0; channel < numInput; channel++) {
+    for (size_t weight_num = 0; weight_num < numWeight; weight_num++) {
+      size_t curr_output = numInput * channel + weight_num;
       layerOutput[curr_output] = input[channel];
-      layerOutput[curr_output].convolution(filters[filter_num]);
+      layerOutput[curr_output].convolution(weights[weight_num], stride);
     }
   }
 
   return layerOutput;
 }
 
-std::vector<Matrix> ConvLayer::backward(const std::vector<Matrix>& gradOutput) {
-  // Gradient with respect to inputs
-  std::vector<Matrix> inputGradients(
-      layerInput.size(), Matrix(layerInput[0].m(), layerInput[0].n()));
+std::vector<Matrix> ConvLayer::backward(
+    const std::vector<Matrix>& outputGradient) {
+  if (outputGradient.size() != numInput) {
+    throw std::runtime_error("Output gradient size incorrect");
+  }
 
-  // Gradient with respect to filters
-  std::vector<Matrix> filterGradients(outputChannel,
-                                      Matrix(filterSize.m, filterSize.n));
+  for (size_t channel = 0; channel < numInput; channel++) {
+    for (size_t weight_num = 0; weight_num < numWeight; weight_num++) {
+      size_t curr_output = channel * numInput + weight_num;
+      Matrix curr_weightGradient = layerInput[channel];
+      Matrix curr_inputGradient = weights[weight_num];
 
-  // Track the index of gradOutputs
-  int gradOutputIndex = 0;
+      // Weight gradient = Conv(input, outputGradient)
+      curr_weightGradient.convolution(outputGradient[curr_output], stride);
 
-  // Process each input
-  for (size_t inputIdx = 0; inputIdx < layerInput.size(); ++inputIdx) {
-    // Process each filter for this input
-    for (int f = 0; f < outputChannel; ++f) {
-      Matrix& currentInput = layerInput[inputIdx];
-      Matrix& currentGradOutput = gradOutputs[gradOutputIndex];
+      // This is for previous layer
+      // Input gradient = Conv(weight rotate 180, outputGradient)
+      curr_inputGradient.rotate90(2).convolution(
+          outputGradient[curr_output], stride, Matrix::PaddingType::FULL);
 
-      // Compute filter gradient
-      Matrix filterGradient = currentInput;
-      filterGradient.convolution(currentGradOutput);
-      filterGradients[f] += filterGradient;
-
-      // Compute input gradient
-      Matrix rotatedFilter = filters[f];
-      rotatedFilter.rotate90(2);  // rotate 180
-
-      Matrix inputDeltaForFilter = currentGradOutput;
-      inputDeltaForFilter.convolution(rotatedFilter);
-
-      // Accumulate input gradient
-      inputGradients[inputIdx] += inputDeltaForFilter;
-
-      // Move to next gradient output
-      gradOutputIndex++;
+      weightGradient[weight_num] += curr_weightGradient;
+      inputGradient[channel] += curr_inputGradient;
     }
   }
 
-  // Update filters
-  for (int f = 0; f < outputChannel; ++f) {
-    filters[f] -= learningRate * filterGradients[f];
-  }
+  // Update weights
+  updateWeight();
 
-  return inputGradients;
+  return inputGradient;
 }
 
 MatrixSize ConvLayer::getOutputSize() const {
-  // Calculate output size based on input, filter, and stride
-  int outM = (inputSize.m - filterSize.m) / stride + 1;
-  int outN = (inputSize.n - filterSize.n) / stride + 1;
+  // Calculate output size based on input, weight, and stride
+  size_t outM = (inputSize.m - weightSize.m) / stride + 1;
+  size_t outN = (inputSize.n - weightSize.n) / stride + 1;
   return MatrixSize(outM, outN);
 }
 
-Matrix ConvLayer::computeInputGradient(const Matrix& gradOutput) {
-  // Compute gradient with respect to input
-  // Placeholder - replace with actual gradient computation
-  return Matrix();
-}
-
-void ConvLayer::updateParameters(const Matrix& gradOutput) {
-  // Update filter and bias parameters using gradient descent
+void ConvLayer::updateWeight() {
+  // Update weight and bias parameters using gradient descent
   // Placeholder - replace with actual parameter update logic
 }
