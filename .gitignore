@@ -1,3 +1,16 @@
+# Build artifacts
+*.o
+*.cu.o
+*.so
+*.a
+
+# IDE specific
 .vscode/
+
+# Build directories
 build/
-report/
+config.mk
+
+# Temporary files
+*~
+*.swp

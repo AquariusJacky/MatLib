@@ -9,7 +9,7 @@ RunningUnit::RunningUnit() {
 RunningUnit::~RunningUnit() { delete[] input_matrices; }
 
 int RunningUnit::init(const std::string& name, const int& operation_id,
-                      const Matrix& mat, const bool& isCUDA) {
+                      const CPUMatrix& mat, const bool& isCUDA) {
   if (operation_id != ZEROS && operation_id != ONES &&
       operation_id != TRANSPOSE && operation_id != ABS && operation_id != SUM) {
     std::cout << "In " << test_name << ", the number of inputs is incorrect."
@@ -19,13 +19,13 @@ int RunningUnit::init(const std::string& name, const int& operation_id,
 
   // m x n > 0
   if (mat.size() == 0) {
-    std::cout << "Matrix size has to be larger than 0." << std::endl;
+    std::cout << "CPUMatrix size has to be larger than 0." << std::endl;
     return 1;
   }
 
   if (operation_id == SUM) result_type = Result::VALUE;
 
-  input_matrices = new Matrix[1];
+  input_matrices = new CPUMatrix[1];
   input_matrices[0] = mat;
   test_name = name;
   operation_type = operation_id;
@@ -36,7 +36,8 @@ int RunningUnit::init(const std::string& name, const int& operation_id,
 }
 
 int RunningUnit::init(const std::string& name, const int& operation_id,
-                      const Matrix& mat, const float& val, const bool& isCUDA) {
+                      const CPUMatrix& mat, const float& val,
+                      const bool& isCUDA) {
   if (operation_id != FILL && operation_id != SCALE &&
       operation_id != IDENTITY && operation_id != MAXPOOLING) {
     std::cout << "In " << test_name << ", the number of inputs is incorrect."
@@ -46,11 +47,11 @@ int RunningUnit::init(const std::string& name, const int& operation_id,
 
   // m x n > 0
   if (mat.size() == 0) {
-    std::cout << "Matrix size has to be larger than 0." << std::endl;
+    std::cout << "CPUMatrix size has to be larger than 0." << std::endl;
     return 1;
   }
 
-  input_matrices = new Matrix[1];
+  input_matrices = new CPUMatrix[1];
   input_matrices[0] = mat;
   operation_value = val;
   test_name = name;
@@ -62,7 +63,7 @@ int RunningUnit::init(const std::string& name, const int& operation_id,
 }
 
 int RunningUnit::init(const std::string& name, const int& operation_id,
-                      const Matrix& matA, const Matrix& matB,
+                      const CPUMatrix& matA, const CPUMatrix& matB,
                       const bool& isCUDA) {
   if (operation_id != ADD && operation_id != DOT &&
       operation_id != CONVOLUTION) {
@@ -73,7 +74,7 @@ int RunningUnit::init(const std::string& name, const int& operation_id,
   switch (operation_id) {
     case ADD:
       if (matA.m() != matB.m() || matA.n() != matB.n()) {
-        std::cout << "Matrix size has to be the same." << std::endl;
+        std::cout << "CPUMatrix size has to be the same." << std::endl;
         return 1;
       }
       break;
@@ -95,11 +96,11 @@ int RunningUnit::init(const std::string& name, const int& operation_id,
   }
   // m x n > 0
   if (matA.size() == 0) {
-    std::cout << "Matrix size has to be larger than 0." << std::endl;
+    std::cout << "CPUMatrix size has to be larger than 0." << std::endl;
     return 1;
   }
 
-  input_matrices = new Matrix[2];
+  input_matrices = new CPUMatrix[2];
   input_matrices[0] = matA;
   input_matrices[1] = matB;
   test_name = name;
@@ -182,100 +183,101 @@ void RunningUnit::run_cpu() {
     case CONVOLUTION:
       start_time = std::chrono::high_resolution_clock::now();
       result_matrix.convolution(input_matrices[1], 1,
-                                Matrix::PaddingType::FULL);
+                                CPUMatrix::PaddingType::FULL);
       end_time = std::chrono::high_resolution_clock::now();
       break;
   }
   std::chrono::duration<float, std::milli> duration = (end_time - start_time);
   runtime = duration.count();
 }
+
 void RunningUnit::run_gpu() {
   std::chrono::time_point<std::chrono::high_resolution_clock> start_time;
   std::chrono::time_point<std::chrono::high_resolution_clock> end_time;
   switch (operation_type) {
     case ZEROS: {
       start_time = std::chrono::high_resolution_clock::now();
-      CUDA::Matrix gpu_mat(input_matrices[0]);
+      GPUMatrix gpu_mat(input_matrices[0]);
       gpu_mat.fill(0);
       gpu_mat.toCPU(result_matrix);
       end_time = std::chrono::high_resolution_clock::now();
     } break;
     case ONES: {
       start_time = std::chrono::high_resolution_clock::now();
-      CUDA::Matrix gpu_mat(input_matrices[0]);
+      GPUMatrix gpu_mat(input_matrices[0]);
       gpu_mat.fill(1);
       gpu_mat.toCPU(result_matrix);
       end_time = std::chrono::high_resolution_clock::now();
     } break;
     // case TRANSPOSE: {
     //   start_time = std::chrono::high_resolution_clock::now();
-    //   CUDA::Matrix gpu_mat(input_matrices[0]);
+    //   GPUMatrix gpu_mat(input_matrices[0]);
     //   gpu_mat.T();
     //   gpu_mat.toCPU(result_matrix);
     //   end_time = std::chrono::high_resolution_clock::now();
     // } break;
     // case ABS: {
     //   start_time = std::chrono::high_resolution_clock::now();
-    //   CUDA::Matrix gpu_mat(input_matrices[0]);
+    //   GPUMatrix gpu_mat(input_matrices[0]);
     //   gpu_mat.abs(0);
     //   gpu_mat.toCPU(result_matrix);
     //   end_time = std::chrono::high_resolution_clock::now();
     // } break;
     // case SUM: {
     //   start_time = std::chrono::high_resolution_clock::now();
-    //   CUDA::Matrix gpu_mat(input_matrices[0]);
+    //   GPUMatrix gpu_mat(input_matrices[0]);
     //   gpu_mat.sum();
     //   gpu_mat.toCPU(result_matrix);
     //   end_time = std::chrono::high_resolution_clock::now();
     // } break;
     case FILL: {
       start_time = std::chrono::high_resolution_clock::now();
-      CUDA::Matrix gpu_mat(input_matrices[0]);
+      GPUMatrix gpu_mat(input_matrices[0]);
       gpu_mat.fill(operation_value);
       gpu_mat.toCPU(result_matrix);
       end_time = std::chrono::high_resolution_clock::now();
     } break;
     case IDENTITY: {
       start_time = std::chrono::high_resolution_clock::now();
-      CUDA::Matrix gpu_mat(input_matrices[0]);
+      GPUMatrix gpu_mat(input_matrices[0]);
       gpu_mat.fill(0);
       gpu_mat.toCPU(result_matrix);
       end_time = std::chrono::high_resolution_clock::now();
     } break;
-    // case SCALE: {
-    //   std::chrono::high_resolution_clock::now();
-    //   CUDA::Matrix gpu_mat(input_matrices[0]);
-    //   gpu_mat.scale(operation_value);
-    //   gpu_mat.toCPU(result_matrix);
-    //   end_time = std::chrono::high_resolution_clock::now();
-    // } break;
+    case SCALE: {
+      std::chrono::high_resolution_clock::now();
+      GPUMatrix gpu_mat(input_matrices[0]);
+      gpu_mat.scale(operation_value);
+      gpu_mat.toCPU(result_matrix);
+      end_time = std::chrono::high_resolution_clock::now();
+    } break;
     case MAXPOOLING: {
       start_time = std::chrono::high_resolution_clock::now();
-      CUDA::Matrix gpu_input_matA(input_matrices[0]);
+      GPUMatrix gpu_input_matA(input_matrices[0]);
       gpu_input_matA.maxPooling(operation_value);
       gpu_input_matA.toCPU(result_matrix);
       end_time = std::chrono::high_resolution_clock::now();
     } break;
     case ADD: {
       start_time = std::chrono::high_resolution_clock::now();
-      CUDA::Matrix gpu_input_matA(input_matrices[0]);
-      CUDA::Matrix gpu_input_matB(input_matrices[1]);
+      GPUMatrix gpu_input_matA(input_matrices[0]);
+      GPUMatrix gpu_input_matB(input_matrices[1]);
       gpu_input_matA.add(gpu_input_matB);
       gpu_input_matA.toCPU(result_matrix);
       end_time = std::chrono::high_resolution_clock::now();
     } break;
     case DOT: {
       start_time = std::chrono::high_resolution_clock::now();
-      CUDA::Matrix gpu_input_matA(input_matrices[0]);
-      CUDA::Matrix gpu_input_matB(input_matrices[1]);
+      GPUMatrix gpu_input_matA(input_matrices[0]);
+      GPUMatrix gpu_input_matB(input_matrices[1]);
       gpu_input_matA.dot(gpu_input_matB);
       gpu_input_matA.toCPU(result_matrix);
       end_time = std::chrono::high_resolution_clock::now();
     } break;
     case CONVOLUTION: {
       start_time = std::chrono::high_resolution_clock::now();
-      CUDA::Matrix gpu_input_matA(input_matrices[0]);
-      CUDA::Matrix gpu_input_matB(input_matrices[1]);
+      GPUMatrix gpu_input_matA(input_matrices[0]);
+      GPUMatrix gpu_input_matB(input_matrices[1]);
       gpu_input_matA.convolution(gpu_input_matB);
       gpu_input_matA.toCPU(result_matrix);
       end_time = std::chrono::high_resolution_clock::now();

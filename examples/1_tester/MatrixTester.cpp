@@ -2,14 +2,14 @@
 
 MatrixTester::MatrixTester() {}
 MatrixTester::~MatrixTester() {
-  for (int i = 0; i < testerVec.size(); i++) {
+  for (int i = 0; i < (int)testerVec.size(); i++) {
     delete testerVec[i];
   }
 }
 
 void MatrixTester::createTest(const std::string& test_name,
                               const std::string& operation_name,
-                              const Matrix& mat, const bool& isCUDA) {
+                              const CPUMatrix& mat, const bool& isCUDA) {
   if (getOperationType().count(operation_name) == 0) {
     std::cout << "In " << test_name << ", " << operation_name
               << " is not a valid operation." << std::endl;
@@ -30,7 +30,7 @@ void MatrixTester::createTest(const std::string& test_name,
 
 void MatrixTester::createTest(const std::string& test_name,
                               const std::string& operation_name,
-                              const Matrix& mat, const float& val,
+                              const CPUMatrix& mat, const float& val,
                               const bool& isCUDA) {
   if (getOperationType().count(operation_name) == 0) {
     std::cout << "In " << test_name << ", " << operation_name
@@ -52,7 +52,7 @@ void MatrixTester::createTest(const std::string& test_name,
 
 void MatrixTester::createTest(const std::string& test_name,
                               const std::string& operation_name,
-                              const Matrix& matA, const Matrix& matB,
+                              const CPUMatrix& matA, const CPUMatrix& matB,
                               const bool& isCUDA) {
   if (getOperationType().count(operation_name) == 0) {
     std::cout << "In " << test_name << ", " << operation_name
@@ -122,12 +122,12 @@ void MatrixTester::printError(const int& testerAID, const int& testerBID) {
 
   float error;
   if (test1->result_type == RunningUnit::Result::MATRIX) {
-    Matrix matA = test1->result();
-    Matrix matB = test2->result();
+    CPUMatrix matA = test1->result();
+    CPUMatrix matB = test2->result();
     if (matA.m() != matB.m() || matA.n() != matB.n()) {
-      std::cout << "Matrix dimensions do not match" << std::endl;
+      std::cout << "CPUMatrix dimensions do not match" << std::endl;
     }
-    Matrix diff = matA - matB;
+    CPUMatrix diff = matA - matB;
     error = diff.sum();
   } else {
     float valA = test1->result_value;
@@ -147,7 +147,7 @@ void MatrixTester::printTime(const int& testerID) {
 }
 
 int MatrixTester::isValidTesterID(const int& testerID) {
-  if (testerID < 0 || testerID >= testerVec.size()) {
+  if (testerID < 0 || testerID >= (int)testerVec.size()) {
     std::cout << "Invalid tester ID: " << testerID << std::endl;
     return 0;
   }
@@ -156,7 +156,7 @@ int MatrixTester::isValidTesterID(const int& testerID) {
 
 int MatrixTester::findTester(const std::string& name) {
   int testerID = -1;
-  for (int i = 0; i < testerVec.size(); i++) {
+  for (int i = 0; i < (int)testerVec.size(); i++) {
     if (testerVec[i]->name() == name) testerID = i;
   }
   if (testerID == -1)
