@@ -32,10 +32,29 @@ make clean  # Clean build files
 
 You can modify test parameters in `MatrixTester.h`:
 ```cpp
-static const int MATRIX_SIZE = 1000;
-static const int NUM_ITERATIONS = 100;
-static const float ERROR_THRESHOLD = 1e-6;
+  MatrixTester tester;
+  CPUMatrix cpumatA(3, 3);
+
+  // To create test
+  // - createTest({Any test name you like}, {Command}, {Matrix to operate}, {useCUDA})
+  tester.createTest("Matrix A Fill CUDA", "ones", cpumatA, true);
+  tester.runTest("Matrix A Fill CUDA");
+  tester.printResult("Matrix A Fill CUDA"); // prints the entire Matrix
+  tester.printTime("Matrix A Fill CUDA");   // miliseconds
+  tester.printError("Matrix A Fill CUDA");  // MSE
 ```
+
+The comments are still in progress.
+There are multiple commands to choose from:
+
+"zeros", "ones", "transpose", "absolute", "sum",
+"fill", "identity", "scale","maxPooling",
+"addition", "dot", "convolution"
+
+Currently "transpose", "absolute", and "sum" doesn't support GPU calculation.
+
+CPU calculations are for time comparison.
+In the future if there are more implementations of a function, it might also get a tester update for more comparison.
 
 ## Troubleshooting
 
@@ -52,5 +71,5 @@ static const float ERROR_THRESHOLD = 1e-6;
 
 ## See Also
 
-- [Basic Example](../0_basic/README.md)
 - [GPUMatrix Documentation](../../docs/README.md)
+- [Basic Example](../0_basic/README.md)

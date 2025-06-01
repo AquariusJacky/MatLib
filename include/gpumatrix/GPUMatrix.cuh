@@ -29,7 +29,7 @@ class GPUMatrix {
   GPUMatrix& operator=(const GPUMatrix& matB);
 
   // CUDA Operations
-  void fill(const float& val);
+  GPUMatrix& fill(const float& val);
   GPUMatrix& add(const GPUMatrix& matB);
   GPUMatrix& dot(const GPUMatrix& matB);
   GPUMatrix& scale(const float& scalar);

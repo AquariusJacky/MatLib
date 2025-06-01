@@ -126,4 +126,7 @@ make uninstall      # For local installation
 - Debug builds can be enabled with `make BUILD_TYPE=Debug`
 - Installation requires write permissions to the target directory
 
-For more detailed information, see the Developer Guide.
+## See Also
+
+- [Installation Guide](docs/installation.md)
+- [Examples](examples/)

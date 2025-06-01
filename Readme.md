@@ -30,7 +30,8 @@ gpuA.scale(2.0f);
 
 ## Documentation
 
-- [API Reference](docs/api.md)
+- [Installation Guide](docs/installation.md)
+- [Usage Guide](docs/getting-started.md)
 - [Examples](examples/)
 - [Performance Tests](examples/1_tester/)
 

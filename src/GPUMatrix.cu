@@ -314,7 +314,7 @@ __global__ void matrixFillKernel(float* A, const float val, size_t m,
   }
 }
 
-void GPUMatrix::fill(const float& val) {
+GPUMatrix& GPUMatrix::fill(const float& val) {
   size_t m = m_, n = n_;
 
   // Set up grid and block dimensions
@@ -338,6 +338,8 @@ void GPUMatrix::fill(const float& val) {
     std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
     throw std::runtime_error("Device synchronization failed");
   }
+
+  return (*this);
 }
 
 // Example CUDA kernel for matrix multiplication
