@@ -1,6 +1,6 @@
-# CUDAMatrix Examples
+# GPUMatrix Examples
 
-This directory contains example programs demonstrating the usage of CUDAMatrix library.
+This directory contains example programs demonstrating the usage of GPUMatrix library.
 
 ## Building Examples
 
@@ -38,13 +38,13 @@ make             # Build all examples
 
 ## Creating Your Own Programs
 
-To compile your own program using CUDAMatrix:
+To compile your own program using GPUMatrix:
 
 ```bash
 g++ -std=c++11 your_program.cpp \
-    -I/path/to/cudamatrix/include \
-    -L/path/to/cudamatrix/lib \
-    -lcudamatrix -lcudart
+    -I/path/to/gpumatrix/include \
+    -L/path/to/gpumatrix/lib \
+    -lgpumatrix -lcudart
 ```
 
-Make sure to have CUDA toolkit installed and the CUDAMatrix library built.
+Make sure to have CUDA toolkit installed and the GPUMatrix library built.
