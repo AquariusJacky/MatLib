@@ -9,7 +9,7 @@ MatrixTester::~MatrixTester() {
 
 void MatrixTester::createTest(const std::string& test_name,
                               const std::string& operation_name,
-                              const CPUMatrix& mat, const bool& isCUDA) {
+                              const CPU::Matrix& mat, const bool& isCUDA) {
   if (getOperationType().count(operation_name) == 0) {
     std::cout << "In " << test_name << ", " << operation_name
               << " is not a valid operation." << std::endl;
@@ -30,7 +30,7 @@ void MatrixTester::createTest(const std::string& test_name,
 
 void MatrixTester::createTest(const std::string& test_name,
                               const std::string& operation_name,
-                              const CPUMatrix& mat, const float& val,
+                              const CPU::Matrix& mat, const float& val,
                               const bool& isCUDA) {
   if (getOperationType().count(operation_name) == 0) {
     std::cout << "In " << test_name << ", " << operation_name
@@ -52,7 +52,7 @@ void MatrixTester::createTest(const std::string& test_name,
 
 void MatrixTester::createTest(const std::string& test_name,
                               const std::string& operation_name,
-                              const CPUMatrix& matA, const CPUMatrix& matB,
+                              const CPU::Matrix& matA, const CPU::Matrix& matB,
                               const bool& isCUDA) {
   if (getOperationType().count(operation_name) == 0) {
     std::cout << "In " << test_name << ", " << operation_name
@@ -122,12 +122,12 @@ void MatrixTester::printError(const int& testerAID, const int& testerBID) {
 
   float error;
   if (test1->result_type == RunningUnit::Result::MATRIX) {
-    CPUMatrix matA = test1->result();
-    CPUMatrix matB = test2->result();
+    CPU::Matrix matA = test1->result();
+    CPU::Matrix matB = test2->result();
     if (matA.m() != matB.m() || matA.n() != matB.n()) {
-      std::cout << "CPUMatrix dimensions do not match" << std::endl;
+      std::cout << "CPU::Matrix dimensions do not match" << std::endl;
     }
-    CPUMatrix diff = matA - matB;
+    CPU::Matrix diff = matA - matB;
     error = diff.sum();
   } else {
     float valA = test1->result_value;

@@ -6,7 +6,9 @@
 #include <iostream>
 #include <vector>
 
-class GPUMatrix;  // class forward declaration
+namespace GPU {
+class Matrix;  // class forward declaration
+}
 
 struct MatrixSize {
   size_t m;
@@ -27,7 +29,9 @@ struct MatrixSize {
   ~MatrixSize() {}
 };
 
-class CPUMatrix {
+namespace CPU {
+
+class Matrix {
  private:
   size_t m_;
   size_t n_;
@@ -38,16 +42,16 @@ class CPUMatrix {
   enum PaddingType { NONE, FULL };
 
  public:
-  friend class GPUMatrix;
+  friend class GPU::Matrix;
 
-  CPUMatrix();
-  CPUMatrix(const size_t& n);
-  CPUMatrix(const size_t& m, const size_t& n);
-  CPUMatrix(const MatrixSize& size);
-  CPUMatrix(const CPUMatrix& matB);
-  CPUMatrix(const std::vector<float>& vec);
-  CPUMatrix(const std::vector<std::vector<float>>& mat_from_vec);
-  ~CPUMatrix();
+  Matrix();
+  Matrix(const size_t& n);
+  Matrix(const size_t& m, const size_t& n);
+  Matrix(const MatrixSize& size);
+  Matrix(const Matrix& matB);
+  Matrix(const std::vector<float>& vec);
+  Matrix(const std::vector<std::vector<float>>& mat_from_vec);
+  ~Matrix();
 
   size_t m() const { return m_; }
   size_t n() const { return n_; }
@@ -56,68 +60,69 @@ class CPUMatrix {
   float& operator()(const size_t& x, const size_t& y);
   const float& operator()(const size_t& x, const size_t& y) const;
 
-  CPUMatrix& operator=(const CPUMatrix& matB);
-  CPUMatrix& operator+=(const CPUMatrix& matB);
-  CPUMatrix& operator-=(const CPUMatrix& matB);
-  CPUMatrix& operator*=(const float& scale);
-  CPUMatrix operator+(const CPUMatrix& matB) const;
-  CPUMatrix operator-(const CPUMatrix& matB) const;
-  CPUMatrix operator*(const float& scale) const;
-  CPUMatrix copy() const { return (*this); }
+  Matrix& operator=(const Matrix& matB);
+  Matrix& operator+=(const Matrix& matB);
+  Matrix& operator-=(const Matrix& matB);
+  Matrix& operator*=(const float& scale);
+  Matrix operator+(const Matrix& matB) const;
+  Matrix operator-(const Matrix& matB) const;
+  Matrix operator*(const float& scale) const;
+  Matrix copy() const { return (*this); }
 
-  CPUMatrix& reshape(const size_t& n);
-  CPUMatrix& reshape(const size_t& m, const size_t& n);
-  CPUMatrix& reshape(const MatrixSize& size);
-  CPUMatrix& resize(const size_t& n);
-  CPUMatrix& resize(const size_t& m, const size_t& n);
-  CPUMatrix& resize(const MatrixSize& sz);
+  Matrix& reshape(const size_t& n);
+  Matrix& reshape(const size_t& m, const size_t& n);
+  Matrix& reshape(const MatrixSize& size);
+  Matrix& resize(const size_t& n);
+  Matrix& resize(const size_t& m, const size_t& n);
+  Matrix& resize(const MatrixSize& sz);
 
-  CPUMatrix& ones();
-  CPUMatrix& ones(const size_t& n);
-  CPUMatrix& ones(const size_t& m, const size_t& n);
-  CPUMatrix& ones(const MatrixSize& sz);
-  CPUMatrix& zeros();
-  CPUMatrix& zeros(const size_t& n);
-  CPUMatrix& zeros(const size_t& m, const size_t& n);
-  CPUMatrix& zeros(const MatrixSize& sz);
+  Matrix& ones();
+  Matrix& ones(const size_t& n);
+  Matrix& ones(const size_t& m, const size_t& n);
+  Matrix& ones(const MatrixSize& sz);
+  Matrix& zeros();
+  Matrix& zeros(const size_t& n);
+  Matrix& zeros(const size_t& m, const size_t& n);
+  Matrix& zeros(const MatrixSize& sz);
 
-  CPUMatrix& arange(const float& end);
-  CPUMatrix& arange(const float& start, const float& end);
-  CPUMatrix& arange(const float& start, const float& end, const float& step);
-  CPUMatrix& rand(const float& lower_limit, const float& upper_limit);
+  Matrix& arange(const float& end);
+  Matrix& arange(const float& start, const float& end);
+  Matrix& arange(const float& start, const float& end, const float& step);
+  Matrix& rand(const float& lower_limit, const float& upper_limit);
 
-  CPUMatrix& fill(const float& val);
-  CPUMatrix& I(const size_t& sz);
-  CPUMatrix& T();
-  CPUMatrix& flip(const size_t& axis);  // 0 for column, 1 for row
-  CPUMatrix& rotate90(const size_t& k);
-  CPUMatrix& identity(const size_t& sz) { return (*this).I(sz); }
-  CPUMatrix& eye(const size_t& n) { return (*this).I(n); }
-  CPUMatrix& transpose() { return (*this).T(); }
-  CPUMatrix& abs();                            // Absolute
-  CPUMatrix& fabs() { return (*this).abs(); }  // Floating point absolute
+  Matrix& fill(const float& val);
+  Matrix& I(const size_t& sz);
+  Matrix& T();
+  Matrix& flip(const size_t& axis);  // 0 for column, 1 for row
+  Matrix& rotate90(const size_t& k);
+  Matrix& identity(const size_t& sz) { return (*this).I(sz); }
+  Matrix& eye(const size_t& n) { return (*this).I(n); }
+  Matrix& transpose() { return (*this).T(); }
+  Matrix& abs();                            // Absolute
+  Matrix& fabs() { return (*this).abs(); }  // Floating point absolute
   // Only works with square matrix, matrix self dot
-  CPUMatrix& power(const float& power);
+  Matrix& power(const float& power);
   float sum();
 
-  CPUMatrix col(const size_t& col_num);
-  CPUMatrix cols(const size_t& col_start, const size_t& col_end);
-  CPUMatrix row(const size_t& row_num);
-  CPUMatrix rows(const size_t& row_start, const size_t& row_end);
-  CPUMatrix submatrix(const size_t& row_start, const size_t& row_end,
-                      const size_t& col_start, const size_t& col_end);
+  Matrix col(const size_t& col_num);
+  Matrix cols(const size_t& col_start, const size_t& col_end);
+  Matrix row(const size_t& row_num);
+  Matrix rows(const size_t& row_start, const size_t& row_end);
+  Matrix submatrix(const size_t& row_start, const size_t& row_end,
+                   const size_t& col_start, const size_t& col_end);
 
-  CPUMatrix& concatenate(const CPUMatrix& matB, const size_t& axis);
+  Matrix& concatenate(const Matrix& matB, const size_t& axis);
 
-  CPUMatrix& dot(const CPUMatrix& matB);
-  CPUMatrix& convolution(const CPUMatrix& mask);
-  CPUMatrix& convolution(const CPUMatrix& mask, const size_t& stride);
-  CPUMatrix& convolution(const CPUMatrix& mask, const size_t& stride,
-                         const PaddingType& padding_type);
+  Matrix& dot(const Matrix& matB);
+  Matrix& convolution(const Matrix& mask);
+  Matrix& convolution(const Matrix& mask, const size_t& stride);
+  Matrix& convolution(const Matrix& mask, const size_t& stride,
+                      const PaddingType& padding_type);
 
-  CPUMatrix& maxPooling(const size_t& size);
+  Matrix& maxPooling(const size_t& size);
 };
 
-std::ostream& operator<<(std::ostream&, const CPUMatrix&);
+std::ostream& operator<<(std::ostream&, const Matrix&);
 
+}  // namespace CPU
 #endif

@@ -33,7 +33,7 @@ make run-1_tester     # Run matrix multiplication example
 ## Example Programs
 
 1. `0_basic`: Demonstrates basic matrix operations and usage
-2. `1_tester`: Performance comparison with CPU operations
+2. `1_tester`: Performance comparison with CPU operations with 
 
 ## Creating Your Own Programs
 

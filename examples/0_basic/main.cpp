@@ -13,11 +13,11 @@ int main() {
       transfer_to_gpu_time, calculation_time, transfer_to_cpu_time;
 
   // Create a CPU matrix
-  CPUMatrix cpuMat(MATRIX_SIZE, MATRIX_SIZE);
+  CPU::Matrix cpuMat(MATRIX_SIZE, MATRIX_SIZE);
   start_time = std::chrono::high_resolution_clock::now();
 
   // Create a GPU matrix using the CPU matrix
-  GPUMatrix gpuMat(cpuMat);
+  GPU::Matrix gpuMat(cpuMat);
   transfer_to_gpu_time = std::chrono::high_resolution_clock::now();
 
   ///////////////////////////////

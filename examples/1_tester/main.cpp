@@ -6,7 +6,7 @@
 
 int main() {
   MatrixTester tester;
-  CPUMatrix cpumatA(3, 3);
+  CPU::Matrix cpumatA(3, 3);
 
   tester.createTest("Matrix A Fill CUDA", "ones", cpumatA, true);
   tester.runTest("Matrix A Fill CUDA");

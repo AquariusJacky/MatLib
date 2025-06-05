@@ -40,15 +40,16 @@ class RunningUnit {
   ~RunningUnit();
 
   int init(const std::string& name, const int& operation_id,
-           const CPUMatrix& mat, const bool& isCUDA);
+           const CPU::Matrix& mat, const bool& isCUDA);
   int init(const std::string& name, const int& operation_id,
-           const CPUMatrix& mat, const float& val, const bool& isCUDA);
+           const CPU::Matrix& mat, const float& val, const bool& isCUDA);
   int init(const std::string& name, const int& operation_id,
-           const CPUMatrix& matA, const CPUMatrix& matB, const bool& isCUDA);
+           const CPU::Matrix& matA, const CPU::Matrix& matB,
+           const bool& isCUDA);
 
   void run();
   std::string name() { return test_name; }
-  CPUMatrix result() { return result_matrix; }
+  CPU::Matrix result() { return result_matrix; }
   float time() { return runtime; }
 
   // result may also be a single value: sum
@@ -56,7 +57,7 @@ class RunningUnit {
  private:
   std::string test_name;
   int operation_type;
-  CPUMatrix* input_matrices;
+  CPU::Matrix* input_matrices;
   float operation_value;
   float runtime;
   bool useCUDA;
@@ -67,7 +68,7 @@ class RunningUnit {
     MATRIX,
     VALUE,
   };
-  CPUMatrix result_matrix;
+  CPU::Matrix result_matrix;
   float result_value;
 
   void run_cpu();
@@ -80,14 +81,14 @@ class MatrixTester {
   ~MatrixTester();
 
   void createTest(const std::string& test_name,
-                  const std::string& operation_name, const CPUMatrix& matA,
+                  const std::string& operation_name, const CPU::Matrix& matA,
                   const bool& isCUDA = false);
   void createTest(const std::string& test_name,
-                  const std::string& operation_name, const CPUMatrix& matA,
+                  const std::string& operation_name, const CPU::Matrix& matA,
                   const float& value, const bool& isCUDA = false);
   void createTest(const std::string& test_name,
-                  const std::string& operation_name, const CPUMatrix& matA,
-                  const CPUMatrix& matB, const bool& isCUDA = false);
+                  const std::string& operation_name, const CPU::Matrix& matA,
+                  const CPU::Matrix& matB, const bool& isCUDA = false);
   void runTest(const std::string& test_name);
 
   void printResult(const std::string& name);

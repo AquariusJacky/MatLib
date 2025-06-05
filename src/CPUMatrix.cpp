@@ -4,44 +4,46 @@
 #include <iostream>
 #include <random>
 
+namespace CPU {
+
 /**
  * @brief Turns x, y coordinates to the 1D index of data
  * @param x x coordinate for the desired data in a matrix
  * @param y y coordinate for the desired data in a matrix
  * @return 1D Index of data
  */
-size_t CPUMatrix::calculate_index(const size_t& x, const size_t& y) const {
+size_t Matrix::calculate_index(const size_t& x, const size_t& y) const {
   return x * n_ + y;
 }
 
-CPUMatrix::CPUMatrix() {
+Matrix::Matrix() {
   m_ = 0;
   n_ = 0;
   data_ = nullptr;
 }
 
-CPUMatrix::CPUMatrix(const size_t& n) {
+Matrix::Matrix(const size_t& n) {
   m_ = 1;
   n_ = n;
   data_ = new float[n_];
   for (size_t i = 0; i < n_; i++) data_[i] = 0.0f;
 }
 
-CPUMatrix::CPUMatrix(const size_t& m, const size_t& n) {
+Matrix::Matrix(const size_t& m, const size_t& n) {
   m_ = m;
   n_ = n;
   data_ = new float[m_ * n_];
   for (size_t i = 0; i < m_ * n_; i++) data_[i] = 0.0f;
 }
 
-CPUMatrix::CPUMatrix(const MatrixSize& size) {
+Matrix::Matrix(const MatrixSize& size) {
   m_ = size.m;
   n_ = size.n;
   data_ = new float[m_ * n_];
   for (size_t i = 0; i < m_ * n_; i++) data_[i] = 0.0f;
 }
 
-CPUMatrix::CPUMatrix(const CPUMatrix& matB) {
+Matrix::Matrix(const Matrix& matB) {
   m_ = matB.m();
   n_ = matB.n();
   data_ = new float[m_ * n_];
@@ -51,14 +53,14 @@ CPUMatrix::CPUMatrix(const CPUMatrix& matB) {
     }
   }
 }
-CPUMatrix::CPUMatrix(const std::vector<float>& vec) {
+Matrix::Matrix(const std::vector<float>& vec) {
   m_ = 1;
   n_ = vec.size();
   data_ = new float[n_];
   for (size_t i = 0; i < n_; i++) data_[i] = vec[i];
 }
 
-CPUMatrix::CPUMatrix(const std::vector<std::vector<float>>& mat_from_vec) {
+Matrix::Matrix(const std::vector<std::vector<float>>& mat_from_vec) {
   if (mat_from_vec.size() == 0 || mat_from_vec[0].size() == 0) {
     m_ = 0;
     n_ = 0;
@@ -76,23 +78,23 @@ CPUMatrix::CPUMatrix(const std::vector<std::vector<float>>& mat_from_vec) {
   }
 }
 
-CPUMatrix::~CPUMatrix() { delete[] data_; }
+Matrix::~Matrix() { delete[] data_; }
 
-float& CPUMatrix::operator()(const size_t& x, const size_t& y) {
+float& Matrix::operator()(const size_t& x, const size_t& y) {
   if (x >= m_ || y >= n_) {
     throw std::runtime_error("Index out of bounds");
   }
   return data_[calculate_index(x, y)];
 }
 
-const float& CPUMatrix::operator()(const size_t& x, const size_t& y) const {
+const float& Matrix::operator()(const size_t& x, const size_t& y) const {
   if (x >= m_ || y >= n_) {
     throw std::runtime_error("Index out of bounds");
   }
   return data_[calculate_index(x, y)];
 }
 
-CPUMatrix& CPUMatrix::operator=(const CPUMatrix& matB) {
+Matrix& Matrix::operator=(const Matrix& matB) {
   delete[] data_;
   m_ = matB.m_;
   n_ = matB.n_;
@@ -101,7 +103,7 @@ CPUMatrix& CPUMatrix::operator=(const CPUMatrix& matB) {
   return (*this);
 }
 
-CPUMatrix& CPUMatrix::operator+=(const CPUMatrix& matB) {
+Matrix& Matrix::operator+=(const Matrix& matB) {
   if (m_ != matB.m_ || n_ != matB.n_) {
     return (*this);  // Or implement error handling as needed
   }
@@ -115,7 +117,7 @@ CPUMatrix& CPUMatrix::operator+=(const CPUMatrix& matB) {
   return (*this);
 }
 
-CPUMatrix& CPUMatrix::operator-=(const CPUMatrix& matB) {
+Matrix& Matrix::operator-=(const Matrix& matB) {
   if (m_ != matB.m_ || n_ != matB.n_) {
     return (*this);  // Or implement error handling as needed
   }
@@ -129,7 +131,7 @@ CPUMatrix& CPUMatrix::operator-=(const CPUMatrix& matB) {
   return (*this);
 }
 
-CPUMatrix& CPUMatrix::operator*=(const float& scale) {
+Matrix& Matrix::operator*=(const float& scale) {
   for (size_t i = 0; i < m_; i++) {
     for (size_t j = 0; j < n_; j++) {
       (*this)(i, j) *= scale;
@@ -139,26 +141,26 @@ CPUMatrix& CPUMatrix::operator*=(const float& scale) {
   return (*this);
 }
 
-CPUMatrix CPUMatrix::operator+(const CPUMatrix& matB) const {
-  CPUMatrix result(*this);
+Matrix Matrix::operator+(const Matrix& matB) const {
+  Matrix result(*this);
   result += matB;
   return result;
 }
 
-CPUMatrix CPUMatrix::operator-(const CPUMatrix& matB) const {
-  CPUMatrix result(*this);
+Matrix Matrix::operator-(const Matrix& matB) const {
+  Matrix result(*this);
   result -= matB;
   return result;
 }
 
-CPUMatrix CPUMatrix::operator*(const float& scale) const {
-  CPUMatrix result(*this);
+Matrix Matrix::operator*(const float& scale) const {
+  Matrix result(*this);
   result *= scale;
   return result;
 }
 
-CPUMatrix& CPUMatrix::reshape(const size_t& n) { return (*this).reshape(1, n); }
-CPUMatrix& CPUMatrix::reshape(const size_t& m, const size_t& n) {
+Matrix& Matrix::reshape(const size_t& n) { return (*this).reshape(1, n); }
+Matrix& Matrix::reshape(const size_t& m, const size_t& n) {
   if (m * n != size()) {
     // Error handle
     throw std::runtime_error("Reshape: size doesn't match");
@@ -169,15 +171,15 @@ CPUMatrix& CPUMatrix::reshape(const size_t& m, const size_t& n) {
 
   return (*this);
 }
-CPUMatrix& CPUMatrix::reshape(const MatrixSize& size) {
+Matrix& Matrix::reshape(const MatrixSize& size) {
   return (*this).reshape(size.m, size.n);
 }
 
-CPUMatrix& CPUMatrix::resize(const size_t& n) { return (*this).resize(1, n); }
-CPUMatrix& CPUMatrix::resize(const size_t& m, const size_t& n) {
+Matrix& Matrix::resize(const size_t& n) { return (*this).resize(1, n); }
+Matrix& Matrix::resize(const size_t& m, const size_t& n) {
   size_t size = (*this).size();
   size_t new_size = m * n;
-  CPUMatrix mat(m, n);
+  Matrix mat(m, n);
   size_t i, new_i = 0;
   while (new_i < new_size) {
     for (i = 0; i < size && new_i < new_size; i++, new_i++) {
@@ -188,60 +190,58 @@ CPUMatrix& CPUMatrix::resize(const size_t& m, const size_t& n) {
   return (*this) = mat;
 }
 
-CPUMatrix& CPUMatrix::ones() {
+Matrix& Matrix::ones() {
   (*this).fill(1);
   return (*this);
 }
 
-CPUMatrix& CPUMatrix::ones(const size_t& n) {
-  CPUMatrix mat(1, n);
+Matrix& Matrix::ones(const size_t& n) {
+  Matrix mat(1, n);
   mat.fill(1);
   return (*this) = mat;
 }
 
-CPUMatrix& CPUMatrix::ones(const size_t& m, const size_t& n) {
-  CPUMatrix mat(m, n);
+Matrix& Matrix::ones(const size_t& m, const size_t& n) {
+  Matrix mat(m, n);
   mat.fill(1);
   return (*this) = mat;
 }
 
-CPUMatrix& CPUMatrix::zeros() {
+Matrix& Matrix::zeros() {
   (*this).fill(0);
   return (*this);
 }
 
-CPUMatrix& CPUMatrix::zeros(const size_t& n) {
-  CPUMatrix mat(1, n);
+Matrix& Matrix::zeros(const size_t& n) {
+  Matrix mat(1, n);
   mat.fill(0);
   return (*this) = mat;
 }
 
-CPUMatrix& CPUMatrix::zeros(const size_t& m, const size_t& n) {
-  CPUMatrix mat(m, n);
+Matrix& Matrix::zeros(const size_t& m, const size_t& n) {
+  Matrix mat(m, n);
   mat.fill(0);
   return (*this) = mat;
 }
 
-CPUMatrix& CPUMatrix::arange(const float& end) {
-  return (*this).arange(0, end, 1);
-};
-CPUMatrix& CPUMatrix::arange(const float& start, const float& end) {
+Matrix& Matrix::arange(const float& end) { return (*this).arange(0, end, 1); };
+Matrix& Matrix::arange(const float& start, const float& end) {
   return (*this).arange(start, end, 1);
 };
 
-CPUMatrix& CPUMatrix::arange(const float& start, const float& end,
-                             const float& step) {
+Matrix& Matrix::arange(const float& start, const float& end,
+                       const float& step) {
   size_t n = (size_t)ceil((end - start) / step);
-  CPUMatrix mat(n);
+  Matrix mat(n);
   float val = start;
   for (size_t i = 0; i < n; i++, val += step) {
     mat.data_[i] = val;
   }
   return (*this) = mat;
 }
-CPUMatrix& CPUMatrix::rand(const float& lower_limit, const float& upper_limit) {
+Matrix& Matrix::rand(const float& lower_limit, const float& upper_limit) {
   if (m_ == 0 || n_ == 0) {
-    throw std::runtime_error("CPUMatrix can't have size 0");
+    throw std::runtime_error("Matrix can't have size 0");
   }
 
   std::default_random_engine generator;
@@ -254,9 +254,9 @@ CPUMatrix& CPUMatrix::rand(const float& lower_limit, const float& upper_limit) {
   return (*this);
 }
 
-CPUMatrix& CPUMatrix::fill(const float& val) {
+Matrix& Matrix::fill(const float& val) {
   if (m_ == 0 || n_ == 0) {
-    throw std::runtime_error("CPUMatrix can't have size 0");
+    throw std::runtime_error("Matrix can't have size 0");
   }
 
   for (size_t i = 0; i < m_ * n_; i++) {
@@ -266,8 +266,8 @@ CPUMatrix& CPUMatrix::fill(const float& val) {
   return (*this);
 }
 
-CPUMatrix& CPUMatrix::I(const size_t& sz) {
-  CPUMatrix Imat(sz, sz);
+Matrix& Matrix::I(const size_t& sz) {
+  Matrix Imat(sz, sz);
 
   for (size_t i = 0; i < sz; i++) {
     for (size_t j = 0; j < sz; j++) {
@@ -278,8 +278,8 @@ CPUMatrix& CPUMatrix::I(const size_t& sz) {
   return (*this) = Imat;
 }
 
-CPUMatrix& CPUMatrix::T() {
-  CPUMatrix result(n_, m_);
+Matrix& Matrix::T() {
+  Matrix result(n_, m_);
 
   for (size_t i = 0; i < m_; i++) {
     for (size_t j = 0; j < n_; j++) {
@@ -296,7 +296,7 @@ CPUMatrix& CPUMatrix::T() {
  * column (left right)
  * @return The flipped matrix.
  */
-CPUMatrix& CPUMatrix::flip(const size_t& axis) {
+Matrix& Matrix::flip(const size_t& axis) {
   if (axis != 0 && axis != 1) {
     throw std::runtime_error("Axis can only be 0 (row) or 1 (col)");
   }
@@ -323,10 +323,10 @@ CPUMatrix& CPUMatrix::flip(const size_t& axis) {
  * @param k Number of times the array is rotated by 90 degrees.
  * @return The rotated matrix.
  */
-CPUMatrix& CPUMatrix::rotate90(const size_t& k) {
+Matrix& Matrix::rotate90(const size_t& k) {
   switch (k % 4) {
     case 1: {
-      CPUMatrix result(n_, m_);
+      Matrix result(n_, m_);
       for (size_t i = 0; i < m_; i++) {
         for (size_t j = 0; j < n_; j++) {
           result(n_ - j - 1, i) = (*this)(i, j);
@@ -335,7 +335,7 @@ CPUMatrix& CPUMatrix::rotate90(const size_t& k) {
       (*this) = result;
     } break;
     case 2: {
-      CPUMatrix result(m_, n_);
+      Matrix result(m_, n_);
       for (size_t i = 0; i < m_; i++) {
         for (size_t j = 0; j < n_; j++) {
           result(m_ - i - 1, n_ - j - 1) = (*this)(i, j);
@@ -344,7 +344,7 @@ CPUMatrix& CPUMatrix::rotate90(const size_t& k) {
       (*this) = result;
     } break;
     case 3: {
-      CPUMatrix result(n_, m_);
+      Matrix result(n_, m_);
       for (size_t i = 0; i < m_; i++) {
         for (size_t j = 0; j < n_; j++) {
           result(j, m_ - i - 1) = (*this)(i, j);
@@ -359,13 +359,13 @@ CPUMatrix& CPUMatrix::rotate90(const size_t& k) {
   return (*this);
 }
 
-CPUMatrix& CPUMatrix::abs() {
+Matrix& Matrix::abs() {
   for (size_t i = 0; i < m_ * n_; i++) data_[i] = std::fabs(data_[i]);
 
   return (*this);
 }
 
-float CPUMatrix::sum() {
+float Matrix::sum() {
   float sum = 0;
   for (size_t i = 0; i < m_ * n_; i++) sum += data_[i];
   return sum;
@@ -376,7 +376,7 @@ float CPUMatrix::sum() {
  * @param col_num The single column to be returned.
  * @return The desired column.
  */
-CPUMatrix CPUMatrix::col(const size_t& col_num) {
+Matrix Matrix::col(const size_t& col_num) {
   return (*this).submatrix(0, m_, col_num, col_num + 1);
 }
 
@@ -387,7 +387,7 @@ CPUMatrix CPUMatrix::col(const size_t& col_num) {
  * @param col_end Index after the ending column.
  * @return The matrix of desired columns.
  */
-CPUMatrix CPUMatrix::cols(const size_t& col_start, const size_t& col_end) {
+Matrix Matrix::cols(const size_t& col_start, const size_t& col_end) {
   return (*this).submatrix(0, m_, col_start, col_end);
 }
 
@@ -396,7 +396,7 @@ CPUMatrix CPUMatrix::cols(const size_t& col_start, const size_t& col_end) {
  * @param col_num The single row to be returned.
  * @return The desired row.
  */
-CPUMatrix CPUMatrix::row(const size_t& row_num) {
+Matrix Matrix::row(const size_t& row_num) {
   return (*this).submatrix(row_num, row_num + 1, 0, n_);
 }
 
@@ -407,7 +407,7 @@ CPUMatrix CPUMatrix::row(const size_t& row_num) {
  * @param row_end Index after the ending row.
  * @return The matrix of desired rows.
  */
-CPUMatrix CPUMatrix::rows(const size_t& row_start, const size_t& row_end) {
+Matrix Matrix::rows(const size_t& row_start, const size_t& row_end) {
   return (*this).submatrix(row_start, row_end, 0, n_);
 }
 
@@ -420,8 +420,8 @@ CPUMatrix CPUMatrix::rows(const size_t& row_start, const size_t& row_end) {
  * @param col_end Ending column index
  * @return The submatrix from start index to the one before end index.
  */
-CPUMatrix CPUMatrix::submatrix(const size_t& row_start, const size_t& row_end,
-                               const size_t& col_start, const size_t& col_end) {
+Matrix Matrix::submatrix(const size_t& row_start, const size_t& row_end,
+                         const size_t& col_start, const size_t& col_end) {
   if (row_start < 0 || row_start > m_ || row_end < 0 || row_end > m_ ||
       col_start < 0 || col_start > n_ || col_end < 0 || col_end > n_) {
     throw std::runtime_error("Submatrix: Index out of bounds");
@@ -434,7 +434,7 @@ CPUMatrix CPUMatrix::submatrix(const size_t& row_start, const size_t& row_end,
     throw std::runtime_error("End index has to be larger than start index");
   }
 
-  CPUMatrix sub_mat(new_m, new_n);
+  Matrix sub_mat(new_m, new_n);
   for (size_t i = 0; i < new_m; i++) {
     for (size_t j = 0; j < new_n; j++) {
       sub_mat(i, j) = (*this)(row_start + i, col_start + j);
@@ -446,11 +446,11 @@ CPUMatrix CPUMatrix::submatrix(const size_t& row_start, const size_t& row_end,
 
 /**
  * @brief Concatenates matrix B to the end of current matrix
- * @param matB CPUMatrix to be concatenated
+ * @param matB Matrix to be concatenated
  * @param axis The axis to concatenate. 0 for row, 1 for column
  * @return The concatenated matrix.
  */
-CPUMatrix& CPUMatrix::concatenate(const CPUMatrix& matB, const size_t& axis) {
+Matrix& Matrix::concatenate(const Matrix& matB, const size_t& axis) {
   if (axis != 0 && axis != 1) {
     throw std::runtime_error("Axis can only be 0 (row) or 1 (col)");
   }
@@ -461,14 +461,14 @@ CPUMatrix& CPUMatrix::concatenate(const CPUMatrix& matB, const size_t& axis) {
 
   size_t matASize = (*this).size();
 
-  CPUMatrix result;
+  Matrix result;
   if (axis == 0) {
-    result = CPUMatrix(m_ + matB.m_, n_);
+    result = Matrix(m_ + matB.m_, n_);
     for (size_t i = 0; i < matASize; i++) result.data_[i] = data_[i];
     for (size_t i = 0; i < matB.size(); i++)
       result.data_[matASize + i] = matB.data_[i];
   } else {
-    result = CPUMatrix(m_, n_ + matB.n_);
+    result = Matrix(m_, n_ + matB.n_);
 
     for (size_t i = 0; i < m_; i++) {
       for (size_t j = 0; j < n_; j++) result(i, j) = (*this)(i, j);
@@ -479,7 +479,7 @@ CPUMatrix& CPUMatrix::concatenate(const CPUMatrix& matB, const size_t& axis) {
   return (*this) = result;
 }
 
-CPUMatrix& CPUMatrix::dot(const CPUMatrix& matB) {
+Matrix& Matrix::dot(const Matrix& matB) {
   // Create error handlers
   if (!data_) return (*this);
   if (!matB.data_) return (*this);
@@ -487,7 +487,7 @@ CPUMatrix& CPUMatrix::dot(const CPUMatrix& matB) {
     return *this;
   }
 
-  CPUMatrix result(m_, matB.n_);
+  Matrix result(m_, matB.n_);
 
   for (size_t i = 0; i < m_; i++) {
     for (size_t j = 0; j < matB.n_; j++) {
@@ -502,16 +502,16 @@ CPUMatrix& CPUMatrix::dot(const CPUMatrix& matB) {
   return (*this) = result;
 }
 
-CPUMatrix& CPUMatrix::convolution(const CPUMatrix& mask) {
+Matrix& Matrix::convolution(const Matrix& mask) {
   return (*this).convolution(mask, 1, PaddingType::NONE);
 }
-CPUMatrix& CPUMatrix::convolution(const CPUMatrix& mask, const size_t& stride) {
+Matrix& Matrix::convolution(const Matrix& mask, const size_t& stride) {
   return (*this).convolution(mask, stride, PaddingType::NONE);
 }
 
 // Only supports square convolution and no padding on all sides
-CPUMatrix& CPUMatrix::convolution(const CPUMatrix& mask, const size_t& stride,
-                                  const PaddingType& padding_type) {
+Matrix& Matrix::convolution(const Matrix& mask, const size_t& stride,
+                            const PaddingType& padding_type) {
   if (m_ != n_) {
     throw std::runtime_error("Input matrix has to be square matrix");
   }
@@ -523,12 +523,12 @@ CPUMatrix& CPUMatrix::convolution(const CPUMatrix& mask, const size_t& stride,
         "Input size has to be larger or equal to mask size");
   }
 
-  CPUMatrix result;
+  Matrix result;
   size_t maskSize = mask.m();
 
   if (padding_type == PaddingType::NONE) {
     size_t newM = m_ + 1 - maskSize;
-    result = CPUMatrix(newM, newM);
+    result = Matrix(newM, newM);
 
     for (size_t i = 0; i < newM; i++) {
       for (size_t j = 0; j < newM; j++) {
@@ -543,7 +543,7 @@ CPUMatrix& CPUMatrix::convolution(const CPUMatrix& mask, const size_t& stride,
     }
   } else if (padding_type == PaddingType::FULL) {
     size_t newM = m_ + maskSize - 1;
-    result = CPUMatrix(newM, newM);
+    result = Matrix(newM, newM);
     for (size_t i = 0; i < newM; i++) {
       for (size_t j = 0; j < newM; j++) {
         float sum = 0;
@@ -566,18 +566,18 @@ CPUMatrix& CPUMatrix::convolution(const CPUMatrix& mask, const size_t& stride,
 
 /**
  * @brief Concatenates matrix B to the end of current matrix
- * @param matB CPUMatrix to be concatenated
+ * @param matB Matrix to be concatenated
  * @param axis The axis to concatenate. 0 for row, 1 for column
  * @return The concatenated matrix.
  */
-CPUMatrix& CPUMatrix::maxPooling(const size_t& pooling_size) {
+Matrix& Matrix::maxPooling(const size_t& pooling_size) {
   if (pooling_size > m_ || pooling_size > n_) {
     throw std::runtime_error("Pooling size can't be larger than matrix size");
   }
 
   size_t new_m = m_ / pooling_size, new_n = n_ / pooling_size;
 
-  CPUMatrix result(new_m, new_n);
+  Matrix result(new_m, new_n);
 
   for (size_t i = 0; i < new_m; i++) {
     for (size_t j = 0; j < new_n; j++) {
@@ -594,7 +594,7 @@ CPUMatrix& CPUMatrix::maxPooling(const size_t& pooling_size) {
   return (*this) = result;
 }
 
-std::ostream& operator<<(std::ostream& os, const CPUMatrix& mat) {
+std::ostream& operator<<(std::ostream& os, const Matrix& mat) {
   size_t m = mat.m(), n = mat.n();
 
   os << "[[" << mat(0, 0);
@@ -622,3 +622,5 @@ std::ostream& operator<<(std::ostream& os, const CPUMatrix& mat) {
 
   return os;
 }
+
+}  // namespace CPU

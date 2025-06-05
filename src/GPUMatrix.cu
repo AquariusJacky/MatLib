@@ -7,6 +7,8 @@
 #define BLOCK_SIZE 16
 #define TILE_SIZE 16
 
+namespace GPU {
+
 __global__ void vectorAdd(const float* A, const float* B, float* C,
                           int numElements) {
   int i = blockDim.x * blockIdx.x + threadIdx.x;
@@ -174,8 +176,7 @@ int testCUDA() {
   return 0;
 }
 
-GPUMatrix::GPUMatrix(const CPUMatrix& cpu_mat)
-    : m_(cpu_mat.m_), n_(cpu_mat.n_) {
+Matrix::Matrix(const CPU::Matrix& cpu_mat) : m_(cpu_mat.m_), n_(cpu_mat.n_) {
   allocateDeviceMemory();
 
   // Copy data from CPU to GPU
@@ -189,11 +190,11 @@ GPUMatrix::GPUMatrix(const CPUMatrix& cpu_mat)
   }
 }
 
-GPUMatrix::GPUMatrix(const size_t m, const size_t n) : m_(m), n_(n) {
+Matrix::Matrix(const size_t m, const size_t n) : m_(m), n_(n) {
   allocateDeviceMemory();
 }
 
-GPUMatrix::GPUMatrix(const GPUMatrix& matB) : m_(matB.m_), n_(matB.n_) {
+Matrix::Matrix(const Matrix& matB) : m_(matB.m_), n_(matB.n_) {
   allocateDeviceMemory();
 
   // Copy data from GPU to GPU
@@ -207,13 +208,13 @@ GPUMatrix::GPUMatrix(const GPUMatrix& matB) : m_(matB.m_), n_(matB.n_) {
   }
 }
 
-GPUMatrix::~GPUMatrix() {
+Matrix::~Matrix() {
   m_ = 0;
   n_ = 0;
   freeDeviceMemory();
 }
 
-void GPUMatrix::allocateDeviceMemory() {
+void Matrix::allocateDeviceMemory() {
   if (m_ * n_ > 0) {
     cudaError_t status = cudaMalloc(&d_data, m_ * n_ * sizeof(float));
 
@@ -224,15 +225,15 @@ void GPUMatrix::allocateDeviceMemory() {
   }
 }
 
-void GPUMatrix::freeDeviceMemory() {
+void Matrix::freeDeviceMemory() {
   if (d_data) {
     cudaFree(d_data);
     d_data = nullptr;
   }
 }
 
-void GPUMatrix::toCPU(CPUMatrix& cpu_mat) {
-  cpu_mat = CPUMatrix(m_, n_);
+void Matrix::toCPU(CPU::Matrix& cpu_mat) {
+  cpu_mat = CPU::Matrix(m_, n_);
 
   cudaError_t status = cudaMemcpy(
       cpu_mat.data_, d_data, m_ * n_ * sizeof(float), cudaMemcpyDeviceToHost);
@@ -243,7 +244,7 @@ void GPUMatrix::toCPU(CPUMatrix& cpu_mat) {
   }
 }
 
-GPUMatrix& GPUMatrix::operator=(const GPUMatrix& matB) {
+Matrix& Matrix::operator=(const Matrix& matB) {
   freeDeviceMemory();
 
   m_ = matB.m_;
@@ -275,7 +276,7 @@ __global__ void matrixScaleKernel(float* A, const float val, size_t m,
   }
 }
 
-GPUMatrix& GPUMatrix::scale(const float& scalar) {
+Matrix& Matrix::scale(const float& scalar) {
   size_t m = m_, n = n_;
 
   // Set up grid and block dimensions
@@ -314,7 +315,7 @@ __global__ void matrixFillKernel(float* A, const float val, size_t m,
   }
 }
 
-GPUMatrix& GPUMatrix::fill(const float& val) {
+Matrix& Matrix::fill(const float& val) {
   size_t m = m_, n = n_;
 
   // Set up grid and block dimensions
@@ -354,7 +355,7 @@ __global__ void addKernel(const float* A, const float* B, float* output,
   __syncthreads();
 }
 
-GPUMatrix& GPUMatrix::add(const GPUMatrix& matB) {
+Matrix& Matrix::add(const Matrix& matB) {
   size_t m = m_, n = n_;
 
   if (matB.m_ != m || matB.n_ != n) {
@@ -366,7 +367,7 @@ GPUMatrix& GPUMatrix::add(const GPUMatrix& matB) {
   dim3 dimGrid((m + dimBlock.x - 1) / dimBlock.x,
                (n + dimBlock.y - 1) / dimBlock.y);
 
-  GPUMatrix result(m, n);
+  Matrix result(m, n);
 
   // Launch kernel
   addKernel<<<dimGrid, dimBlock>>>(d_data, matB.d_data, result.d_data, m, n);
@@ -422,14 +423,14 @@ __global__ void dotKernel(const float* A, const float* B, float* output,
   if (row < m && col < n) output[row * n + col] = sum;
 }
 
-GPUMatrix& GPUMatrix::dot(const GPUMatrix& matB) {
+Matrix& Matrix::dot(const Matrix& matB) {
   size_t m = m_, k = n_, n = matB.n_;
 
   if (matB.m_ != k) {
     throw std::runtime_error("col # of A doesn't match row # of B");
   }
 
-  GPUMatrix result(m, n);
+  Matrix result(m, n);
 
   // Set up grid and block dimensions
   dim3 dimBlock(TILE_SIZE, TILE_SIZE);
@@ -471,7 +472,7 @@ __global__ void convolutionKernel(const float* A, const float* mask,
   __syncthreads();
 }
 
-GPUMatrix& GPUMatrix::convolution(const GPUMatrix& mask) {
+Matrix& Matrix::convolution(const Matrix& mask) {
   size_t m = m_, n = n_, k = mask.m_;
 
   if (mask.n_ != k) {
@@ -481,7 +482,7 @@ GPUMatrix& GPUMatrix::convolution(const GPUMatrix& mask) {
   size_t out_m = m - k + 1;
   size_t out_n = n - k + 1;
 
-  GPUMatrix result(out_m, out_n);
+  Matrix result(out_m, out_n);
 
   // Set up grid and block dimensions
   dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
@@ -524,13 +525,13 @@ __global__ void maxPoolingKernel(const float* A, float* output, size_t m,
   __syncthreads();
 }
 
-GPUMatrix& GPUMatrix::maxPooling(const size_t& size) {
+Matrix& Matrix::maxPooling(const size_t& size) {
   size_t m = m_, n = n_;
 
   size_t out_m = m_ / size;
   size_t out_n = n_ / size;
 
-  GPUMatrix result(out_m, out_n);
+  Matrix result(out_m, out_n);
 
   // Set up grid and block dimensions
   dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
@@ -549,3 +550,5 @@ GPUMatrix& GPUMatrix::maxPooling(const size_t& size) {
 
   return (*this) = result;
 }
+
+}  // namespace GPU

@@ -7,7 +7,8 @@
 
 #include "CPUMatrix.h"
 
-class GPUMatrix {
+namespace GPU {
+class Matrix {
  private:
   float* d_data;  // Device data
   size_t m_;
@@ -17,26 +18,27 @@ class GPUMatrix {
   void freeDeviceMemory();
 
  public:
-  GPUMatrix() : d_data(nullptr), m_(0), n_(0) {}
-  GPUMatrix(const size_t m, const size_t n);
-  GPUMatrix(const CPUMatrix& cpu_mat);
-  GPUMatrix(const GPUMatrix& matB);
-  ~GPUMatrix();
+  Matrix() : d_data(nullptr), m_(0), n_(0) {}
+  Matrix(const size_t m, const size_t n);
+  Matrix(const CPU::Matrix& cpu_mat);
+  Matrix(const Matrix& matB);
+  ~Matrix();
 
   // Copy back to CPU
-  void toCPU(CPUMatrix& cpu_mat);
+  void toCPU(CPU::Matrix& cpu_mat);
 
-  GPUMatrix& operator=(const GPUMatrix& matB);
+  Matrix& operator=(const Matrix& matB);
 
   // CUDA Operations
-  GPUMatrix& fill(const float& val);
-  GPUMatrix& add(const GPUMatrix& matB);
-  GPUMatrix& dot(const GPUMatrix& matB);
-  GPUMatrix& scale(const float& scalar);
-  GPUMatrix& convolution(const GPUMatrix& mask);
-  GPUMatrix& maxPooling(const size_t& size);
+  Matrix& fill(const float& val);
+  Matrix& add(const Matrix& matB);
+  Matrix& dot(const Matrix& matB);
+  Matrix& scale(const float& scalar);
+  Matrix& convolution(const Matrix& mask);
+  Matrix& maxPooling(const size_t& size);
 };
 
 int testCUDA();
+}  // namespace GPU
 
 #endif
