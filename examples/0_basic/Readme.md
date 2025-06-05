@@ -29,10 +29,10 @@ The example demonstrates:
 
 ```cpp
 // Create CPU matrix
-CPUMatrix cpuA(1000, 1000);
+CPU::Matrix cpuA(1000, 1000);
 
 // Transfer to GPU and perform operations
-GPUMatrix gpuA(cpuA);
+GPU::Matrix gpuA(cpuA);
 cpuA.fill(7.0f);
 gpuA.scale(2.0f);
 

@@ -20,11 +20,11 @@ sudo make install
 #include <gpumatrix/Matrix_CUDA.cuh>
 
 // Create and initialize CPU matrix
-CPUMatrix cpuA(1000, 1000);
+CPU::Matrix cpuA(1000, 1000);
 cpuA.fill(7.0f);
 
 // Transfer to GPU and compute
-GPUMatrix gpuA(cpuA);
+GPU::Matrix gpuA(cpuA);
 gpuA.scale(2.0f);
 ```
 

@@ -33,7 +33,7 @@ make clean  # Clean build files
 You can modify test parameters in `MatrixTester.h`:
 ```cpp
   MatrixTester tester;
-  CPUMatrix cpumatA(3, 3);
+  CPU::Matrix cpumatA(3, 3);
 
   // To create test
   // - createTest({Any test name you like}, {Command}, {Matrix to operate}, {useCUDA})
