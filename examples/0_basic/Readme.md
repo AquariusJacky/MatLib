@@ -1,11 +1,11 @@
-# Basic GPUMatrix Example
+# Basic MatLib Example
 
-This example demonstrates the basic usage of the GPUMatrix library, including matrix creation, data transfer between CPU and GPU, and basic matrix operations.
+This example demonstrates the basic usage of the MatLib library, including matrix creation, data transfer between CPU and GPU, and basic matrix operations.
 
 ## Prerequisites
 
 - CUDA Toolkit (11.0 or higher)
-- GPUMatrix library built and installed
+- MatLib library built and installed
 - C++11 compatible compiler
 - NVIDIA GPU with compute capability 3.0 or higher
 
@@ -60,7 +60,7 @@ Timing:
 
 1. If the library is not found:
    ```bash
-   export LD_LIBRARY_PATH=/path/to/gpumatrix/lib:$LD_LIBRARY_PATH
+   export LD_LIBRARY_PATH=/path/to/matlib/lib:$LD_LIBRARY_PATH
    ```
 
 2. If CUDA is not found:
@@ -71,5 +71,5 @@ Timing:
 
 ## See Also
 
-- [GPUMatrix Documentation](../../docs/README.md)
+- [MatLib Documentation](../../docs/README.md)
 - [Advanced Examples](../1_tester/README.md)

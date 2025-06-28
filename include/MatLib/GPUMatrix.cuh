@@ -24,6 +24,10 @@ class Matrix {
   Matrix(const Matrix& matB);
   ~Matrix();
 
+  size_t m() const { return m_; }
+  size_t n() const { return n_; }
+  size_t size() const { return m_ * n_; }
+
   // Copy back to CPU
   void toCPU(CPU::Matrix& cpu_mat);
 
@@ -34,6 +38,14 @@ class Matrix {
   Matrix& add(const Matrix& matB);
   Matrix& dot(const Matrix& matB);
   Matrix& scale(const float& scalar);
+
+  float& reduction(const std::string& op) const;
+  float& max() const { return reduction("max"); }
+  float& min() const { return reduction("min"); }
+  float& sum() const { return reduction("sum"); }
+
+  int equal(const Matrix& matB) const;
+
   Matrix& convolution(const Matrix& mask);
   Matrix& maxPooling(const size_t& size);
 };

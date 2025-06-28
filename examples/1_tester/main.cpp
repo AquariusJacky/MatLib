@@ -1,8 +1,7 @@
 #include <iostream>
 
 #include "MatrixTester.h"
-#include "gpumatrix/CPUMatrix.h"
-#include "gpumatrix/GPUMatrix.cuh"
+#include "MatLib/Matrix.h"
 
 int main() {
   MatrixTester tester;

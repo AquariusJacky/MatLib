@@ -1,8 +1,7 @@
 #include <chrono>
 #include <iostream>
 
-#include "gpumatrix/CPUMatrix.h"
-#include "gpumatrix/GPUMatrix.cuh"
+#include "MatLib/Matrix.h"
 
 #define MATRIX_SIZE 1000
 #define FILL_VALUE 7.0f

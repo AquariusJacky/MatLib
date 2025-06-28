@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "gpumatrix/GPUMatrix.cuh"
+#include "MatLib/GPUMatrix.cuh"
 
 #define BLOCK_SIZE 16
 #define TILE_SIZE 16
@@ -389,11 +389,11 @@ __global__ void dotKernel(const float* A, const float* B, float* output,
   __shared__ float subTileA[TILE_SIZE][TILE_SIZE];
   __shared__ float subTileB[TILE_SIZE][TILE_SIZE];
 
-  int tx = threadIdx.x;
-  int ty = threadIdx.y;
+  size_t tx = threadIdx.x;
+  size_t ty = threadIdx.y;
 
-  int row = blockIdx.x * blockDim.x + tx;
-  int col = blockIdx.y * blockDim.y + ty;
+  size_t row = blockIdx.x * blockDim.x + tx;
+  size_t col = blockIdx.y * blockDim.y + ty;
 
   float sum = 0;
 

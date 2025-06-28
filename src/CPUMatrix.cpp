@@ -1,4 +1,4 @@
-#include "gpumatrix/CPUMatrix.h"
+#include "MatLib/CPUMatrix.h"
 
 #include <cmath>
 #include <iostream>

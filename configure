@@ -39,7 +39,7 @@ CUDA_PREFIX := ${CUDA_PATH}
 
 # Installation paths
 INSTALL_LIB_PATH := \$(INSTALL_PREFIX)/lib
-INSTALL_INCLUDE_PATH := \$(INSTALL_PREFIX)/include/gpumatrix
+INSTALL_INCLUDE_PATH := \$(INSTALL_PREFIX)/include/MatLib
 
 # CUDA paths
 CUDA_INCLUDE := -I\$(CUDA_PREFIX)/include

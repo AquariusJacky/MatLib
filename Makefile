@@ -44,8 +44,8 @@ CPP_OBJECTS := $(addprefix $(OBJ_DIR)/, $(notdir $(CPP_SOURCES:.cpp=.o)))
 TEST_OBJECTS := $(addprefix $(OBJ_DIR)/, $(notdir $(TEST_SOURCES:.cpp=.o)))
 
 # Library names
-LIB_NAME := libgpumatrix.so
-STATIC_LIB_NAME := libgpumatrix.a
+LIB_NAME := libmatlib.so
+STATIC_LIB_NAME := libmatlib.a
 LIB_OUTPUT := $(LIB_DIR)/$(LIB_NAME)
 STATIC_LIB_OUTPUT := $(LIB_DIR)/$(STATIC_LIB_NAME)
 
@@ -87,7 +87,7 @@ $(STATIC_LIB_OUTPUT): $(CUDA_OBJECTS) $(CPP_OBJECTS)
 # Test targets
 $(TEST_EXECUTABLE): $(TEST_OBJECTS) $(LIB_OUTPUT)
 	@echo "Building tests..."
-	$(CXX) $(CXX_FLAGS) $(TEST_OBJECTS) -o $@ -L$(LIB_DIR) -lgpumatrix $(TEST_LIBS) $(LIB_PATHS) -lcudart
+	$(CXX) $(CXX_FLAGS) $(TEST_OBJECTS) -o $@ -L$(LIB_DIR) -lmatlib $(TEST_LIBS) $(LIB_PATHS) -lcudart
 
 test: $(TEST_EXECUTABLE)
 	@echo "Running tests..."
@@ -100,7 +100,7 @@ install: all
 	@mkdir -p $(INSTALL_INCLUDE_PATH)
 	cp $(LIB_OUTPUT) $(INSTALL_LIB_PATH)/
 	cp $(STATIC_LIB_OUTPUT) $(INSTALL_LIB_PATH)/
-	cp include/gpumatrix/*.h include/gpumatrix/*.cuh $(INSTALL_INCLUDE_PATH)/
+	cp include/MatLib/*.h include/MatLib/*.cuh $(INSTALL_INCLUDE_PATH)/
 	@echo "Updating library cache..."
 	ldconfig $(INSTALL_LIB_PATH)
 

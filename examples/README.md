@@ -1,6 +1,6 @@
-# GPUMatrix Examples
+# MatLib Examples
 
-This directory contains example programs demonstrating the usage of GPUMatrix library.
+This directory contains example programs demonstrating the usage of MatLib library.
 
 ## Building Examples
 
@@ -37,13 +37,13 @@ make run-1_tester     # Run matrix multiplication example
 
 ## Creating Your Own Programs
 
-To compile your own program using GPUMatrix:
+To compile your own program using MatLib:
 
 ```bash
 g++ -std=c++11 your_program.cpp \
-    -I/path/to/gpumatrix/include \
-    -L/path/to/gpumatrix/lib \
-    -lgpumatrix -lcudart
+    -I/path/to/matlib/include \
+    -L/path/to/matlib/lib \
+    -lmatlib -lcudart
 ```
 
-Make sure to have CUDA toolkit installed and the GPUMatrix library built.
+Make sure to have CUDA toolkit installed and the MatLib library built.

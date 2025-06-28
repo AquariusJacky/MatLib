@@ -1,10 +1,10 @@
-# Using GPUMatrix Library in Your Project
+# Using MatLib Library in Your Project
 
 ## Prerequisites
 
 - CUDA Toolkit (11.0 or higher)
 - C++11 compatible compiler (g++)
-- GPUMatrix library installed
+- MatLib library installed
 - NVIDIA GPU with compute capability 3.0 or higher
 
 ## Project Setup
@@ -16,23 +16,36 @@ cd myproject
 touch main.cpp
 ```
 
-2. **Configure Makefile**
+2-1. **Compile**
+```bash
+g++ -std=c++11 your_program.cpp -I/path/to/matlib/include -L/path/to/matlib/lib -lmatlib -lcudart
+```
+
+2-2. **Configure Makefile** \
+Or alternatively, create a Makefile
+
+```bash
+# Create and modify Makefile
+vim Makefile
+```
+
+In Makefile
 ````makefile
 # Compiler settings
 CXX := g++
 NVCC := nvcc
 
-# Change these paths to match your GPUMatrix installation
-GPUMATRIX_PATH := /path/to/installation
+# Change these paths to match your MatLib installation
+MATLIB_PATH := /path/to/installation
 CUDA_PATH := /usr/local/cuda
 
 # Compiler flags
 CXX_FLAGS := -O3 -std=c++11 -Wall
 
 # Include and library paths
-INCLUDES := -I$(GPUMATRIX_PATH)/include
-LIB_PATHS := -L$(GPUMATRIX_PATH)/build/release/lib -L$(CUDA_PATH)/lib64
-LIBS := -lgpumatrix -lcudart
+INCLUDES := -I$(MATLIB_PATH)/include
+LIB_PATHS := -L$(MATLIB_PATH)/build/release/lib -L$(CUDA_PATH)/lib64
+LIBS := -lmatlib -lcudart
 
 # Source files and target
 SOURCES := $(wildcard *.cpp)
@@ -48,7 +61,7 @@ $(BUILD_DIR)/$(TARGET): $(SOURCES) | $(BUILD_DIR)
 	$(CXX) $(CXX_FLAGS) $(INCLUDES) $^ -o $@ $(LIB_PATHS) $(LIBS)
 
 run: $(BUILD_DIR)/$(TARGET)
-	@LD_LIBRARY_PATH=$(GPUMATRIX_PATH)/build/release/lib:$(CUDA_PATH)/lib64 ./$(BUILD_DIR)/$(TARGET)
+	@LD_LIBRARY_PATH=$(MATLIB_PATH)/build/release/lib:$(CUDA_PATH)/lib64 ./$(BUILD_DIR)/$(TARGET)
 
 clean:
 	rm -rf $(BUILD_DIR)
@@ -59,9 +72,6 @@ clean:
 ## Building Your Project
 
 ```bash
-# Update GPUMATRIX_PATH in Makefile to match your installation
-vim Makefile
-
 # Build the program
 make
 
@@ -86,7 +96,7 @@ myproject/
 ### Library Not Found
 ```bash
 # Add to ~/.bashrc or run in terminal
-export LD_LIBRARY_PATH=/path/to/gpumatrix/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/path/to/matlib/lib:$LD_LIBRARY_PATH
 ```
 
 ### CUDA Installation Check
@@ -99,12 +109,12 @@ nvidia-smi
 ```
 
 ### Include Files Not Found
-- Verify `GPUMATRIX_PATH` in Makefile
-- Check if headers exist in `$(GPUMATRIX_PATH)/include/gpumatrix/`
+- Verify `MATLIB_PATH` in Makefile
+- Check if headers exist in `$(MATLIB_PATH)/include/matlib/`
 
 ## Next Steps
 
-See the GPUMatrix library documentation for:
+See the MatLib library documentation for:
 - API Reference
 - Code Examples
 - Performance Tips

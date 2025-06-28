@@ -1,4 +1,4 @@
-# GPUMatrix Library
+# MatLib Library
 
 A high-performance GPU matrix computation library using CUDA.
 
@@ -16,8 +16,8 @@ sudo make install
 ## Usage
 
 ```cpp
-#include <gpumatrix/Matrix.h>
-#include <gpumatrix/Matrix_CUDA.cuh>
+#include <matlib/Matrix.h>
+#include <matlib/Matrix_CUDA.cuh>
 
 // Create and initialize CPU matrix
 CPU::Matrix cpuA(1000, 1000);

@@ -1,6 +1,6 @@
-# GPUMatrix Performance Tester
+# MatLib Performance Tester
 
-This example provides a comprehensive testing suite for the GPUMatrix library, demonstrating performance benchmarks and correctness verification.
+This example provides a comprehensive testing suite for the MatLib library, demonstrating performance benchmarks and correctness verification.
 
 ## Components
 
@@ -66,10 +66,10 @@ In the future if there are more implementations of a function, it might also get
 
 2. Library Path:
    ```bash
-   export LD_LIBRARY_PATH=/path/to/gpumatrix/lib:$LD_LIBRARY_PATH
+   export LD_LIBRARY_PATH=/path/to/matlib/lib:$LD_LIBRARY_PATH
    ```
 
 ## See Also
 
-- [GPUMatrix Documentation](../../docs/README.md)
+- [MatLib Documentation](../../docs/README.md)
 - [Basic Example](../0_basic/README.md)

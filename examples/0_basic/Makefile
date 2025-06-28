@@ -15,7 +15,7 @@ NVCC_FLAGS := -O3 -std=c++11
 # Include and library paths
 INCLUDES := -I$(MATRIX_INCLUDE_PATH) -I$(CUDA_PATH)/include -I.
 LIB_PATHS := -L$(MATRIX_LIB_PATH) -L$(CUDA_PATH)/lib64
-LIBS := -lgpumatrix -lcudart
+LIBS := -lmatlib -lcudart
 
 # Source and build settings
 SOURCES := $(wildcard *.cpp)

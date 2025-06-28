@@ -1,4 +1,4 @@
-# Installation Guide for GPUMatrix Library
+# Installation Guide for MatLib Library
 
 ## Prerequisites
 
@@ -13,8 +13,8 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/AquariusJacky/GPUMatrix.git
-cd GPUMatrix
+git clone https://github.com/AquariusJacky/MatLib.git
+cd MatLib
 
 # Configure installation
 ./configure
@@ -28,8 +28,8 @@ sudo make install
 
 ```bash
 # Clone and enter directory
-git clone https://github.com/AquariusJacky/GPUMatrix.git
-cd GPUMatrix
+git clone https://github.com/AquariusJacky/MatLib.git
+cd MatLib
 
 # Configure with custom path
 ./configure --prefix=$HOME/.local
@@ -47,14 +47,14 @@ source ~/.bashrc
 
 ```bash
 # Clone and enter directory
-git clone https://github.com/AquariusJacky/GPUMatrix.git
-cd GPUMatrix
+git clone https://github.com/AquariusJacky/MatLib.git
+cd MatLib
 
 # Just build the library
 make
 
 # Library will be in build/release/lib
-# Headers will be in include/gpumatrix/
+# Headers will be in include/matlib/
 ```
 
 ## Configuration Options
@@ -69,15 +69,15 @@ make
 
 ```bash
 # Check if library is installed
-ls /usr/local/lib/libgpumatrix.so     # If installed system-wide
-ls $HOME/.local/lib/libgpumatrix.so   # If installed locally
+ls /usr/local/lib/libmatlib.so     # If installed system-wide
+ls $HOME/.local/lib/libmatlib.so   # If installed locally
 
 # Check if headers are installed
-ls /usr/local/include/gpumatrix/*.h    # If installed system-wide
-ls $HOME/.local/include/gpumatrix/*.h  # If installed locally
+ls /usr/local/include/matlib/*.h    # If installed system-wide
+ls $HOME/.local/include/matlib/*.h  # If installed locally
 
 # Verify dynamic library
-ldd /usr/local/lib/libgpumatrix.so
+ldd /usr/local/lib/libmatlib.so
 ```
 
 ## Troubleshooting
@@ -122,7 +122,7 @@ make uninstall      # For local installation
 
 ## Additional Notes
 
-- The library installs both static (`libgpumatrix.a`) and shared (`libgpumatrix.so`) versions
+- The library installs both static (`libmatlib.a`) and shared (`libmatlib.so`) versions
 - Debug builds can be enabled with `make BUILD_TYPE=Debug`
 - Installation requires write permissions to the target directory
 

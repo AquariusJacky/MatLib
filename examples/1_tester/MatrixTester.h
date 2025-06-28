@@ -6,8 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "gpumatrix/CPUMatrix.h"
-#include "gpumatrix/GPUMatrix.cuh"
+#include "MatLib/Matrix.h"
 
 enum {
 
