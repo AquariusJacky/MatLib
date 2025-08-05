@@ -21,7 +21,7 @@ LIBS := -lmatlib -lcudart
 SOURCES := $(wildcard *.cpp)
 OBJECTS := $(SOURCES:%.cpp=build/%.o)
 BUILD_DIR := build
-TARGET := $(BUILD_DIR)/1_tester
+TARGET := $(BUILD_DIR)/2_tester
 
 # Default target
 all: $(TARGET)
@@ -42,7 +42,7 @@ $(TARGET): $(OBJECTS)
 
 # Run the tester example
 run: $(TARGET)
-	@echo "Running 1_tester..."
+	@echo "Running 2_tester..."
 	@LD_LIBRARY_PATH=$(MATRIX_LIB_PATH):$(CUDA_PATH)/lib64 ./$(TARGET)
 
 # Clean build files

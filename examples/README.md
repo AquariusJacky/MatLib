@@ -27,13 +27,15 @@ make              # Build all examples
 
 ```bash
 make run-0_basic      # Run basic operations example
-make run-1_tester     # Run matrix multiplication example
+make run-1_timer      # Run basic with timer example
+make run-2_tester     # Run matrix multiplication example
 ```
 
 ## Example Programs
 
 1. `0_basic`: Demonstrates basic matrix operations and usage
-2. `1_tester`: Performance comparison with CPU operations with 
+1. `1_timer`: Demonstrates basic matrix operations with timer to separate data transfer and operation time
+2. `2_tester`: Performance comparison with CPU operations with 
 
 ## Creating Your Own Programs
 

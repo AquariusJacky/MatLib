@@ -33,6 +33,8 @@ namespace CPU {
 
 class Matrix {
  private:
+  static constexpr size_t MAX_TOTAL_ELEMENTS = 1000000;
+
   size_t m_;
   size_t n_;
   float* data_;  // Stores the actual data in row-major order
@@ -76,6 +78,7 @@ class Matrix {
   Matrix& resize(const size_t& m, const size_t& n);
   Matrix& resize(const MatrixSize& sz);
 
+  Matrix& fill(const float& val);
   Matrix& ones();
   Matrix& ones(const size_t& n);
   Matrix& ones(const size_t& m, const size_t& n);
@@ -90,10 +93,9 @@ class Matrix {
   Matrix& arange(const float& start, const float& end, const float& step);
   Matrix& rand(const float& lower_limit, const float& upper_limit);
 
-  Matrix& fill(const float& val);
   Matrix& I(const size_t& sz);
   Matrix& T();
-  Matrix& flip(const size_t& axis);  // 0 for column, 1 for row
+  Matrix& flip(const size_t& axis);
   Matrix& rotate90(const size_t& k);
   Matrix& identity(const size_t& sz) { return (*this).I(sz); }
   Matrix& eye(const size_t& n) { return (*this).I(n); }
@@ -102,6 +104,8 @@ class Matrix {
   Matrix& fabs() { return (*this).abs(); }  // Floating point absolute
   // Only works with square matrix, matrix self dot
   Matrix& power(const float& power);
+  float max();
+  float min();
   float sum();
 
   Matrix col(const size_t& col_num);

@@ -7,8 +7,8 @@ CXX := g++
 AR := ar
 
 # Compiler flags - add position independent code flag
-NVCC_FLAGS := -O3 -std=c++11 --compiler-options -fPIC
-CXX_FLAGS := -O3 -std=c++11 -fPIC
+NVCC_FLAGS := -O3 -std=c++14 --compiler-options -fPIC
+CXX_FLAGS := -O3 -std=c++14 -fPIC
 DEBUG_FLAGS := -g -G
 
 # Include paths

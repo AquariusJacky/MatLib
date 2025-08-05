@@ -22,21 +22,42 @@ Matrix::Matrix() {
   data_ = nullptr;
 }
 
-Matrix::Matrix(const size_t& n) {
-  m_ = 1;
-  n_ = n;
-  data_ = new float[n_];
-  for (size_t i = 0; i < n_; i++) data_[i] = 0.0f;
-}
-
 Matrix::Matrix(const size_t& m, const size_t& n) {
+  if (m * n > MAX_TOTAL_ELEMENTS) {
+    throw std::runtime_error("Matrix size exceeds maximum allowed elements");
+  }
+  if (m * n == 0) {
+    m_ = 0;
+    n_ = 0;
+    data_ = nullptr;
+    return;
+  }
   m_ = m;
   n_ = n;
   data_ = new float[m_ * n_];
   for (size_t i = 0; i < m_ * n_; i++) data_[i] = 0.0f;
 }
 
+Matrix::Matrix(const size_t& n) {
+  if (n > MAX_TOTAL_ELEMENTS) {
+    throw std::runtime_error("Matrix size exceeds maximum allowed elements");
+  }
+  if (n == 0) {
+    m_ = 0;
+    n_ = 0;
+    data_ = nullptr;
+    return;
+  }
+  m_ = 1;
+  n_ = n;
+  data_ = new float[n_];
+  for (size_t i = 0; i < n_; i++) data_[i] = 0.0f;
+}
+
 Matrix::Matrix(const MatrixSize& size) {
+  if (size.m * size.n > MAX_TOTAL_ELEMENTS) {
+    throw std::runtime_error("Matrix size exceeds maximum allowed elements");
+  }
   m_ = size.m;
   n_ = size.n;
   data_ = new float[m_ * n_];
@@ -54,6 +75,15 @@ Matrix::Matrix(const Matrix& matB) {
   }
 }
 Matrix::Matrix(const std::vector<float>& vec) {
+  if (vec.size() > MAX_TOTAL_ELEMENTS) {
+    throw std::runtime_error("Matrix size exceeds maximum allowed elements");
+  }
+  if (vec.size() == 0) {
+    m_ = 0;
+    n_ = 0;
+    data_ = nullptr;
+    return;
+  }
   m_ = 1;
   n_ = vec.size();
   data_ = new float[n_];
@@ -61,6 +91,10 @@ Matrix::Matrix(const std::vector<float>& vec) {
 }
 
 Matrix::Matrix(const std::vector<std::vector<float>>& mat_from_vec) {
+  if (mat_from_vec.size() > 0 &&
+      mat_from_vec.size() * mat_from_vec[0].size() > MAX_TOTAL_ELEMENTS) {
+    throw std::runtime_error("Matrix size exceeds maximum allowed elements");
+  }
   if (mat_from_vec.size() == 0 || mat_from_vec[0].size() == 0) {
     m_ = 0;
     n_ = 0;
@@ -159,6 +193,9 @@ Matrix Matrix::operator*(const float& scale) const {
   return result;
 }
 
+/**
+ * @brief Reshapes the matrix to a new size with the same data.
+ */
 Matrix& Matrix::reshape(const size_t& n) { return (*this).reshape(1, n); }
 Matrix& Matrix::reshape(const size_t& m, const size_t& n) {
   if (m * n != size()) {
@@ -175,6 +212,10 @@ Matrix& Matrix::reshape(const MatrixSize& size) {
   return (*this).reshape(size.m, size.n);
 }
 
+/**
+ * @brief Resizes the matrix to a new size, filling with zeros if necessary.
+ * If the new size is smaller, data is truncated.
+ */
 Matrix& Matrix::resize(const size_t& n) { return (*this).resize(1, n); }
 Matrix& Matrix::resize(const size_t& m, const size_t& n) {
   size_t size = (*this).size();
@@ -188,6 +229,9 @@ Matrix& Matrix::resize(const size_t& m, const size_t& n) {
   }
 
   return (*this) = mat;
+}
+Matrix& Matrix::resize(const MatrixSize& size) {
+  return (*this).resize(size.m, size.n);
 }
 
 Matrix& Matrix::ones() {
@@ -207,6 +251,12 @@ Matrix& Matrix::ones(const size_t& m, const size_t& n) {
   return (*this) = mat;
 }
 
+Matrix& Matrix::ones(const MatrixSize& sz) {
+  Matrix mat(sz);
+  mat.fill(1);
+  return (*this) = mat;
+}
+
 Matrix& Matrix::zeros() {
   (*this).fill(0);
   return (*this);
@@ -220,6 +270,12 @@ Matrix& Matrix::zeros(const size_t& n) {
 
 Matrix& Matrix::zeros(const size_t& m, const size_t& n) {
   Matrix mat(m, n);
+  mat.fill(0);
+  return (*this) = mat;
+}
+
+Matrix& Matrix::zeros(const MatrixSize& sz) {
+  Matrix mat(sz);
   mat.fill(0);
   return (*this) = mat;
 }
@@ -363,6 +419,20 @@ Matrix& Matrix::abs() {
   for (size_t i = 0; i < m_ * n_; i++) data_[i] = std::fabs(data_[i]);
 
   return (*this);
+}
+
+float Matrix::max() {
+  float max = data_[0];
+  for (size_t i = 1; i < m_ * n_; i++)
+    if (data_[i] > max) max = data_[i];
+  return max;
+}
+
+float Matrix::min() {
+  float min = data_[0];
+  for (size_t i = 1; i < m_ * n_; i++)
+    if (data_[i] < min) min = data_[i];
+  return min;
 }
 
 float Matrix::sum() {

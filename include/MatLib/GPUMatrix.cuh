@@ -39,10 +39,10 @@ class Matrix {
   Matrix& dot(const Matrix& matB);
   Matrix& scale(const float& scalar);
 
-  float& reduction(const std::string& op) const;
-  float& max() const { return reduction("max"); }
-  float& min() const { return reduction("min"); }
-  float& sum() const { return reduction("sum"); }
+  Matrix reduction(const std::string& op) const;
+  Matrix max() const { return reduction("max"); }
+  Matrix min() const { return reduction("min"); }
+  Matrix sum() const { return reduction("sum"); }
 
   int equal(const Matrix& matB) const;
 

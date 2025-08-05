@@ -28,6 +28,12 @@ GPU::Matrix gpuA(cpuA);
 gpuA.scale(2.0f);
 ```
 
+## To Do list
+- Reduction
+- Scan
+- histogram
+- Sparse Matrix (SpMV, CSR, etc.)
+
 ## Documentation
 
 - [Installation Guide](docs/installation.md)

@@ -111,8 +111,8 @@ class MatrixTester {
     static const std::unordered_map<std::string, int> operationTypes = {
         {"zeros", ZEROS},
         {"ones", ONES},
-        {"transpose", TRANSPOSE},
-        {"absolute", ABS},
+        {"transpose", TRANSPOSE},  // Not implemented in GPU yet
+        {"absolute", ABS},         // Not implemented in GPU yet
         {"sum", SUM},
 
         {"fill", FILL},
@@ -120,9 +120,9 @@ class MatrixTester {
         {"scale", SCALE},
         {"maxPooling", MAXPOOLING},
 
-        {"addition", ADD},
+        {"add", ADD},
         {"dot", DOT},
-        {"convolution", CONVOLUTION}};
+        {"conv", CONVOLUTION}};
     return operationTypes;
   }
 };

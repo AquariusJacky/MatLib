@@ -183,7 +183,7 @@ void RunningUnit::run_cpu() {
     case CONVOLUTION:
       start_time = std::chrono::high_resolution_clock::now();
       result_matrix.convolution(input_matrices[1], 1,
-                                CPU::Matrix::PaddingType::FULL);
+                                CPU::Matrix::PaddingType::NONE);
       end_time = std::chrono::high_resolution_clock::now();
       break;
   }
@@ -223,13 +223,14 @@ void RunningUnit::run_gpu() {
     //   gpu_mat.toCPU(result_matrix);
     //   end_time = std::chrono::high_resolution_clock::now();
     // } break;
-    // case SUM: {
-    //   start_time = std::chrono::high_resolution_clock::now();
-    //   GPU::Matrix gpu_mat(input_matrices[0]);
-    //   gpu_mat.sum();
-    //   gpu_mat.toCPU(result_matrix);
-    //   end_time = std::chrono::high_resolution_clock::now();
-    // } break;
+    case SUM: {
+      start_time = std::chrono::high_resolution_clock::now();
+      GPU::Matrix gpu_mat(input_matrices[0]);
+      GPU::Matrix resultGMat = gpu_mat.sum();
+      resultGMat.toCPU(result_matrix);
+      result_value = result_matrix(0, 0);
+      end_time = std::chrono::high_resolution_clock::now();
+    } break;
     case FILL: {
       start_time = std::chrono::high_resolution_clock::now();
       GPU::Matrix gpu_mat(input_matrices[0]);

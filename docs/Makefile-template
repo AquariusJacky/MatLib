@@ -1,0 +1,37 @@
+
+# Compiler settings
+CXX := g++
+NVCC := nvcc
+
+# Change these paths to match your MatLib installation
+MATLIB_PATH := /path/to/installation
+CUDA_PATH := /usr/local/cuda
+
+# Compiler flags
+CXX_FLAGS := -O3 -std=c++11 -Wall
+
+# Include and library paths
+INCLUDES := -I$(MATLIB_PATH)/include
+LIB_PATHS := -L$(MATLIB_PATH)/build/release/lib -L$(CUDA_PATH)/lib64
+LIBS := -lmatlib -lcudart
+
+# Source files and target
+SOURCES := $(wildcard *.cpp)
+TARGET := myprogram
+BUILD_DIR := build
+
+all: $(BUILD_DIR)/$(TARGET)
+
+$(BUILD_DIR):
+	@mkdir -p $(BUILD_DIR)
+
+$(BUILD_DIR)/$(TARGET): $(SOURCES) | $(BUILD_DIR)
+	$(CXX) $(CXX_FLAGS) $(INCLUDES) $^ -o $@ $(LIB_PATHS) $(LIBS)
+
+run: $(BUILD_DIR)/$(TARGET)
+	@LD_LIBRARY_PATH=$(MATLIB_PATH)/build/release/lib:$(CUDA_PATH)/lib64 ./$(BUILD_DIR)/$(TARGET)
+
+clean:
+	rm -rf $(BUILD_DIR)
+
+.PHONY: all run clean

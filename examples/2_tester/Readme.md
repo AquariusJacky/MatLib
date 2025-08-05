@@ -49,7 +49,7 @@ There are multiple commands to choose from:
 
 "zeros", "ones", "transpose", "absolute", "sum",
 "fill", "identity", "scale","maxPooling",
-"addition", "dot", "convolution"
+"add", "dot", "conv"
 
 Currently "transpose", "absolute", and "sum" doesn't support GPU calculation.
 

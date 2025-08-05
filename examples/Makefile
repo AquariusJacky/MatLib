@@ -1,5 +1,5 @@
 # Example directories
-EXAMPLE_DIRS := 0_basic 1_tester
+EXAMPLE_DIRS := 0_basic 1_timer 2_tester
 
 # Pattern rule for examples
 $(EXAMPLE_DIRS):

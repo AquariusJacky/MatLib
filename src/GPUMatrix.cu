@@ -4,8 +4,8 @@
 
 #include "MatLib/GPUMatrix.cuh"
 
-#define BLOCK_SIZE 16
-#define TILE_SIZE 16
+#define BLOCK_SIZE 32
+#define TILE_SIZE 32
 
 namespace GPU {
 
@@ -448,6 +448,175 @@ Matrix& Matrix::dot(const Matrix& matB) {
   }
 
   return (*this) = result;
+}
+
+__global__ void reductionMaxKernel(float* input, float* output, int len) {
+  __shared__ float partialSum[2 * BLOCK_SIZE];
+
+  size_t t = threadIdx.x;
+  size_t start = 2 * blockDim.x * blockIdx.x;
+
+  // Load first block of elements into shared memory
+  if (start + t < len)
+    partialSum[t] = input[start + t];
+  else
+    partialSum[t] = 0;
+
+  // Load second block of elements into shared memory
+  if (start + t + blockDim.x < len)
+    partialSum[t + blockDim.x] = input[start + t + blockDim.x];
+  else
+    partialSum[t + blockDim.x] = 0;
+
+  // Sync threads to ensure all data is loaded
+  __syncthreads();
+
+  for (size_t stride = blockDim.x; stride >= 1; stride >>= 1) {
+    if (t < stride) {
+      // Compare and keep the maximum
+      // If the next element is larger, replace the current one
+      if (partialSum[t + stride] > partialSum[t])
+        partialSum[t] = partialSum[t + stride];
+    }
+    __syncthreads();
+  }
+
+  output[blockIdx.x] = partialSum[0];
+}
+
+__global__ void reductionMinKernel(float* input, float* output, int len) {
+  __shared__ float partialSum[2 * BLOCK_SIZE];
+
+  size_t t = threadIdx.x;
+  size_t start = 2 * blockDim.x * blockIdx.x;
+
+  // Load first block of elements into shared memory
+  if (start + t < len)
+    partialSum[t] = input[start + t];
+  else
+    partialSum[t] = 0;
+
+  // Load second block of elements into shared memory
+  if (start + t + blockDim.x < len)
+    partialSum[t + blockDim.x] = input[start + t + blockDim.x];
+  else
+    partialSum[t + blockDim.x] = 0;
+
+  // Sync threads to ensure all data is loaded
+  __syncthreads();
+
+  for (size_t stride = blockDim.x; stride >= 1; stride >>= 1) {
+    if (t < stride) {
+      // Compare and keep the maximum
+      // If the next element is larger, replace the current one
+      if (partialSum[t + stride] < partialSum[t])
+        partialSum[t] = partialSum[t + stride];
+    }
+    __syncthreads();
+  }
+
+  output[blockIdx.x] = partialSum[0];
+}
+
+__global__ void reductionSumKernel(float* input, float* output, int len) {
+  __shared__ float partialSum[2 * BLOCK_SIZE];
+
+  size_t t = threadIdx.x;
+  size_t start = 2 * blockDim.x * blockIdx.x;
+
+  // Load first block of elements into shared memory
+  if (start + t < len)
+    partialSum[t] = input[start + t];
+  else
+    partialSum[t] = 0;
+
+  // Load second block of elements into shared memory
+  if (start + t + blockDim.x < len)
+    partialSum[t + blockDim.x] = input[start + t + blockDim.x];
+  else
+    partialSum[t + blockDim.x] = 0;
+
+  // Sync threads to ensure all data is loaded
+  __syncthreads();
+
+  for (size_t stride = blockDim.x; stride >= 1; stride >>= 1) {
+    if (t < stride) {
+      partialSum[t] += partialSum[t + stride];
+    }
+    __syncthreads();
+  }
+
+  output[blockIdx.x] = partialSum[0];
+}
+
+Matrix Matrix::reduction(const std::string& op) const {
+  dim3 dimBlock(BLOCK_SIZE);
+  // Number of blocks needed
+  // Each block will handle 2 * BLOCK_SIZE * BLOCK_SIZE elements
+  dim3 dimGrid(((m_ * n_) + (BLOCK_SIZE * 2) - 1) / (BLOCK_SIZE * 2));
+
+  Matrix results(dimGrid.x);
+  cudaError_t status;
+
+  // Launch kernel
+  if (op == "max") {
+    reductionMaxKernel<<<dimGrid, dimBlock>>>(d_data, results.d_data, m_ * n_);
+  } else if (op == "min") {
+    reductionMinKernel<<<dimGrid, dimBlock>>>(d_data, results.d_data, m_ * n_);
+  } else if (op == "sum") {
+    reductionSumKernel<<<dimGrid, dimBlock>>>(d_data, results.d_data, m_ * n_);
+  } else {
+    throw std::runtime_error("Unsupported reduction operation");
+  }
+
+  status = cudaGetLastError();
+  if (status != cudaSuccess) {
+    std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
+    throw std::runtime_error("Reduce Kernel launch failed");
+  }
+
+  // Synchronize
+  status = cudaDeviceSynchronize();
+  if (status != cudaSuccess) {
+    std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
+    throw std::runtime_error("Device synchronization failed");
+  }
+  Matrix finalResult(1);
+
+  // Do a second reduction if more than one block
+  if (dimGrid.x > 1) {
+    // Launch kernel
+    if (op == "max") {
+      reductionMaxKernel<<<1, dimBlock>>>(results.d_data, finalResult.d_data,
+                                          dimGrid.x);
+    } else if (op == "min") {
+      reductionMinKernel<<<1, dimBlock>>>(results.d_data, finalResult.d_data,
+                                          dimGrid.x);
+    } else if (op == "sum") {
+      reductionSumKernel<<<1, dimBlock>>>(results.d_data, finalResult.d_data,
+                                          dimGrid.x);
+    } else {
+      throw std::runtime_error("Unsupported reduction operation");
+    }
+
+    status = cudaGetLastError();
+    if (status != cudaSuccess) {
+      std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
+      throw std::runtime_error("Reduce Kernel launch failed");
+    }
+
+    // Synchronize
+    status = cudaDeviceSynchronize();
+    if (status != cudaSuccess) {
+      std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
+      throw std::runtime_error("Device synchronization failed");
+    }
+  }
+
+  if (dimGrid.x > 1)
+    return finalResult;
+  else
+    return results;
 }
 
 // Example CUDA kernel for matrix multiplication

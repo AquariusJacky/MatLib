@@ -9,65 +9,21 @@
 
 ## Project Setup
 
-1. **Create Project Structure**
+### 1. **Create Project Structure**
 ```bash
 mkdir myproject
 cd myproject
 touch main.cpp
 ```
 
-2-1. **Compile**
+### 2. **Compile**
+
+Compile with the command
 ```bash
 g++ -std=c++11 your_program.cpp -I/path/to/matlib/include -L/path/to/matlib/lib -lmatlib -lcudart
 ```
 
-2-2. **Configure Makefile** \
-Or alternatively, create a Makefile
-
-```bash
-# Create and modify Makefile
-vim Makefile
-```
-
-In Makefile
-````makefile
-# Compiler settings
-CXX := g++
-NVCC := nvcc
-
-# Change these paths to match your MatLib installation
-MATLIB_PATH := /path/to/installation
-CUDA_PATH := /usr/local/cuda
-
-# Compiler flags
-CXX_FLAGS := -O3 -std=c++11 -Wall
-
-# Include and library paths
-INCLUDES := -I$(MATLIB_PATH)/include
-LIB_PATHS := -L$(MATLIB_PATH)/build/release/lib -L$(CUDA_PATH)/lib64
-LIBS := -lmatlib -lcudart
-
-# Source files and target
-SOURCES := $(wildcard *.cpp)
-TARGET := myprogram
-BUILD_DIR := build
-
-all: $(BUILD_DIR)/$(TARGET)
-
-$(BUILD_DIR):
-	@mkdir -p $(BUILD_DIR)
-
-$(BUILD_DIR)/$(TARGET): $(SOURCES) | $(BUILD_DIR)
-	$(CXX) $(CXX_FLAGS) $(INCLUDES) $^ -o $@ $(LIB_PATHS) $(LIBS)
-
-run: $(BUILD_DIR)/$(TARGET)
-	@LD_LIBRARY_PATH=$(MATLIB_PATH)/build/release/lib:$(CUDA_PATH)/lib64 ./$(BUILD_DIR)/$(TARGET)
-
-clean:
-	rm -rf $(BUILD_DIR)
-
-.PHONY: all run clean
-````
+Or alternatively, create a Makefile with the [Makefile-template](./Makefile-template).
 
 ## Building Your Project
 
@@ -123,10 +79,3 @@ See the MatLib library documentation for:
 ## Reference
 - Fastor is a high performance tensor (fixed multi-dimensional array) library for modern C++.
   https://github.com/romeric/Fastor
-
-## To Do list
-- Square Matrix power
-- Reduction
-- Scan
-- histogram
-- Sparse Matrix (SpMV, CSR, etc.)
