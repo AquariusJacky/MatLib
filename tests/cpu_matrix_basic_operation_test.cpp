@@ -20,7 +20,7 @@ class CPUMatrixBasicOperationTest : public ::testing::Test {
   int large_rows, large_cols;
 };
 
-TEST_F(CPUMatrixBasicOperationTest, CPUMatrix_Equal) {
+TEST_F(CPUMatrixBasicOperationTest, CPUMatrixEqualOperator) {
   std::vector<float> vec1D = {1.0f, 2.0f, 3.0f, 4.0f};
   CPU::Matrix matA(vec1D);
   CPU::Matrix matB;
@@ -35,11 +35,10 @@ TEST_F(CPUMatrixBasicOperationTest, CPUMatrix_Equal) {
   }
 }
 
-TEST_F(CPUMatrixBasicOperationTest, CPUMatrix_Plus) {
+TEST_F(CPUMatrixBasicOperationTest, CPUMatrixPlusOperator) {
   // Test 1D vector addition
   std::vector<float> vec1 = {1.0f, 2.0f, 3.0f, 4.0f};
   std::vector<float> vec2 = {5.0f, 6.0f, 7.0f, 8.0f};
-  std::vector<float> expected = {6.0f, 8.0f, 10.0f, 12.0f};
 
   CPU::Matrix matA(vec1);
   CPU::Matrix matB(vec2);
@@ -48,8 +47,8 @@ TEST_F(CPUMatrixBasicOperationTest, CPUMatrix_Plus) {
   EXPECT_EQ(result.m(), matA.m());
   EXPECT_EQ(result.n(), matA.n());
 
-  for (size_t i = 0; i < expected.size(); i++) {
-    EXPECT_FLOAT_EQ(result(0, i), expected[i]);
+  for (size_t i = 0; i < result.size(); i++) {
+    EXPECT_FLOAT_EQ(result(0, i), vec1[i] + vec2[i]);
   }
 
   // Test 2D matrix addition
@@ -74,7 +73,7 @@ TEST_F(CPUMatrixBasicOperationTest, CPUMatrix_Plus) {
   }
 }
 
-TEST_F(CPUMatrixBasicOperationTest, CPUMatrix_Minus) {
+TEST_F(CPUMatrixBasicOperationTest, CPUMatrixMinusOperator) {
   // Test 1D vector subtraction
   std::vector<float> vec1 = {10.0f, 8.0f, 6.0f, 4.0f};
   std::vector<float> vec2 = {1.0f, 2.0f, 3.0f, 4.0f};
@@ -113,7 +112,7 @@ TEST_F(CPUMatrixBasicOperationTest, CPUMatrix_Minus) {
   }
 }
 
-TEST_F(CPUMatrixBasicOperationTest, CPUMatrix_ScalarMultiplication) {
+TEST_F(CPUMatrixBasicOperationTest, CPUMatrixScalarMultiplicationOperator) {
   // Test scalar multiplication with 1D vector
   std::vector<float> vec1 = {1.0f, 2.0f, 3.0f, 4.0f};
   float scalar = 2.5f;
@@ -149,7 +148,7 @@ TEST_F(CPUMatrixBasicOperationTest, CPUMatrix_ScalarMultiplication) {
   }
 }
 
-TEST_F(CPUMatrixBasicOperationTest, CPUMatrix_PlusEqual) {
+TEST_F(CPUMatrixBasicOperationTest, CPUMatrixPlusEqualOperator) {
   // Test += with 1D vectors
   std::vector<float> vec1 = {1.0f, 2.0f, 3.0f, 4.0f};
   std::vector<float> vec2 = {5.0f, 6.0f, 7.0f, 8.0f};
@@ -187,7 +186,7 @@ TEST_F(CPUMatrixBasicOperationTest, CPUMatrix_PlusEqual) {
   }
 }
 
-TEST_F(CPUMatrixBasicOperationTest, CPUMatrix_MinusEqual) {
+TEST_F(CPUMatrixBasicOperationTest, CPUMatrixMinusEqualOperator) {
   // Test -= with 1D vectors
   std::vector<float> vec1 = {10.0f, 8.0f, 6.0f, 4.0f};
   std::vector<float> vec2 = {1.0f, 2.0f, 3.0f, 4.0f};
@@ -225,7 +224,8 @@ TEST_F(CPUMatrixBasicOperationTest, CPUMatrix_MinusEqual) {
   }
 }
 
-TEST_F(CPUMatrixBasicOperationTest, CPUMatrix_ScalarMultiplicationEqual) {
+TEST_F(CPUMatrixBasicOperationTest,
+       CPUMatrixScalarMultiplicationEqualOperator) {
   // Test *= with scalar on 1D vector
   std::vector<float> vec1 = {1.0f, 2.0f, 3.0f, 4.0f};
   float scalar = 2.5f;
@@ -264,7 +264,7 @@ TEST_F(CPUMatrixBasicOperationTest, CPUMatrix_ScalarMultiplicationEqual) {
 }
 
 // Edge cases and error handling tests
-TEST_F(CPUMatrixBasicOperationTest, CPUMatrix_OperationsEdgeCases) {
+TEST_F(CPUMatrixBasicOperationTest, CPUMatrixOperationsEdgeCases) {
   // Test operations with zero matrices
   std::vector<float> zeros = {0.0f, 0.0f, 0.0f, 0.0f};
   std::vector<float> ones = {1.0f, 1.0f, 1.0f, 1.0f};
@@ -295,4 +295,16 @@ TEST_F(CPUMatrixBasicOperationTest, CPUMatrix_OperationsEdgeCases) {
   for (size_t i = 0; i < ones.size(); i++) {
     EXPECT_FLOAT_EQ(result4(0, i), 1.0f);
   }
+}
+
+TEST_F(CPUMatrixBasicOperationTest, CPUMatrixEqual) {
+  std::vector<float> vec1 = {10.0f, 8.0f, 6.0f, 4.0f};
+  std::vector<float> vec2 = {1.0f, 2.0f, 3.0f, 4.0f};
+
+  CPU::Matrix magA(vec1);
+  CPU::Matrix matB(vec1);
+  CPU::Matrix matC(vec2);
+
+  EXPECT_EQ(magA.equal(matB), 1);  // Should be equal
+  EXPECT_EQ(magA.equal(matC), 0);  // Should not be equal
 }

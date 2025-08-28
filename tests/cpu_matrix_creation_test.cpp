@@ -33,7 +33,7 @@ class CPUMatrixCreationTest : public ::testing::Test {
 };
 
 // CPU Matrix Creation Tests
-TEST_F(CPUMatrixCreationTest, CPUMatrix_DefaultConstructor) {
+TEST_F(CPUMatrixCreationTest, CPUMatrixDefaultConstructor) {
   CPU::Matrix mat;  // Default constructor
 
   EXPECT_EQ(mat.m(), 0);
@@ -43,7 +43,7 @@ TEST_F(CPUMatrixCreationTest, CPUMatrix_DefaultConstructor) {
   EXPECT_THROW(mat(0, 0), std::runtime_error);
 }
 
-TEST_F(CPUMatrixCreationTest, CPUMatrix_Constructor_0_size) {
+TEST_F(CPUMatrixCreationTest, CPUMatrixConstructor_0_size) {
   CPU::Matrix mat(0);
 
   EXPECT_EQ(mat.m(), 0);
@@ -53,7 +53,7 @@ TEST_F(CPUMatrixCreationTest, CPUMatrix_Constructor_0_size) {
   EXPECT_THROW(mat(0, 0), std::runtime_error);
 }
 
-TEST_F(CPUMatrixCreationTest, CPUMatrix_Constructor_Small_1D) {
+TEST_F(CPUMatrixCreationTest, CPUMatrixConstructor_Small_1D) {
   // 1D matrix acts like vector: 1 x N
   CPU::Matrix mat(small_cols);
 
@@ -68,7 +68,7 @@ TEST_F(CPUMatrixCreationTest, CPUMatrix_Constructor_Small_1D) {
   EXPECT_THROW(mat(0, small_cols), std::runtime_error);
 }
 
-TEST_F(CPUMatrixCreationTest, CPUMatrix_Constructor_Large_1D) {
+TEST_F(CPUMatrixCreationTest, CPUMatrixConstructor_Large_1D) {
   // 1D matrix acts like vector: 1 x N
   CPU::Matrix mat(large_cols);
 
@@ -83,7 +83,11 @@ TEST_F(CPUMatrixCreationTest, CPUMatrix_Constructor_Large_1D) {
   EXPECT_THROW(mat(0, large_cols), std::runtime_error);
 }
 
-TEST_F(CPUMatrixCreationTest, CPUMatrix_Constructor_Small_2D) {
+TEST_F(CPUMatrixCreationTest, CPUMatrixConstructor_OutOfBounds_1D) {
+  EXPECT_THROW(CPU::Matrix mat(1000001), std::runtime_error);
+}
+
+TEST_F(CPUMatrixCreationTest, CPUMatrixConstructor_Small_2D) {
   CPU::Matrix mat(small_rows, small_cols);
 
   EXPECT_EQ(mat.m(), small_rows);
@@ -98,7 +102,7 @@ TEST_F(CPUMatrixCreationTest, CPUMatrix_Constructor_Small_2D) {
   EXPECT_THROW(mat(small_rows, small_cols), std::runtime_error);
 }
 
-TEST_F(CPUMatrixCreationTest, CPUMatrix_Constructor_Large_2D) {
+TEST_F(CPUMatrixCreationTest, CPUMatrixConstructor_Large_2D) {
   CPU::Matrix mat(large_rows, large_cols);
 
   EXPECT_EQ(mat.m(), large_rows);
@@ -113,7 +117,11 @@ TEST_F(CPUMatrixCreationTest, CPUMatrix_Constructor_Large_2D) {
   EXPECT_THROW(mat(large_rows, large_cols), std::runtime_error);
 }
 
-TEST_F(CPUMatrixCreationTest, CPUMatrix_Constructor_SingleElement) {
+TEST_F(CPUMatrixCreationTest, CPUMatrixConstructor_OutOfBounds_2D) {
+  EXPECT_THROW(CPU::Matrix mat(1000, 1001), std::runtime_error);
+}
+
+TEST_F(CPUMatrixCreationTest, CPUMatrixConstructor_SingleElement) {
   CPU::Matrix mat(1, 1);
   // Test edge case of 1 x 1 matrix
   EXPECT_EQ(mat.m(), 1);
@@ -124,7 +132,7 @@ TEST_F(CPUMatrixCreationTest, CPUMatrix_Constructor_SingleElement) {
   EXPECT_THROW(mat(1, 0), std::runtime_error);
 }
 
-TEST_F(CPUMatrixCreationTest, CPUMatrix_VectorConstructor_1D) {
+TEST_F(CPUMatrixCreationTest, CPUMatrixVectorConstructor_1D) {
   std::vector<float> vec1D = {1.0f, 2.0f, 3.0f, 4.0f};
   CPU::Matrix mat(vec1D);
 
@@ -138,7 +146,7 @@ TEST_F(CPUMatrixCreationTest, CPUMatrix_VectorConstructor_1D) {
   EXPECT_THROW(mat(vec1D.size(), 0), std::runtime_error);
 }
 
-TEST_F(CPUMatrixCreationTest, CPUMatrix_VectorConstructor_2D) {
+TEST_F(CPUMatrixCreationTest, CPUMatrixVectorConstructor_2D) {
   std::vector<std::vector<float>> vec2D = {{1.0f, 2.0f, 3.0f},
                                            {4.0f, 5.0f, 6.0f}};
   CPU::Matrix mat(vec2D);
@@ -155,7 +163,7 @@ TEST_F(CPUMatrixCreationTest, CPUMatrix_VectorConstructor_2D) {
   EXPECT_THROW(mat(0, vec2D[0].size()), std::runtime_error);
 }
 
-TEST_F(CPUMatrixCreationTest, CPUMatrix_CopyConstructor) {
+TEST_F(CPUMatrixCreationTest, CPUMatrixCopyConstructor) {
   std::vector<std::vector<float>> vec2D = {{1.0f, 2.0f, 3.0f},
                                            {4.0f, 5.0f, 6.0f}};
   CPU::Matrix matA(vec2D);

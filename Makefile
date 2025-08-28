@@ -2,13 +2,13 @@
 -include config.mk
 
 # Compiler settings
-NVCC := nvcc
 CXX := g++
+NVCC := nvcc
 AR := ar
 
 # Compiler flags - add position independent code flag
-NVCC_FLAGS := -O3 -std=c++14 --compiler-options -fPIC
 CXX_FLAGS := -O3 -std=c++14 -fPIC
+NVCC_FLAGS := -O3 -std=c++14 --compiler-options -fPIC
 DEBUG_FLAGS := -g -G
 
 # Include paths
@@ -20,7 +20,7 @@ LIB_PATHS := $(CUDA_LIBDIR)
 
 # Build type (Release by default)
 BUILD_TYPE ?= Release
-ifeq ($(BUILD_TYPE),Debug)
+ifeq ($(BUILD_TYPE), Debug)
 	NVCC_FLAGS += $(DEBUG_FLAGS)
 	CXX_FLAGS += -g
 	BUILD_DIR := build/debug
@@ -34,14 +34,18 @@ LIB_DIR := $(BUILD_DIR)/lib
 TEST_DIR := $(BUILD_DIR)/tests
 
 # Source files
-CUDA_SOURCES := $(wildcard src/*.cu)
 CPP_SOURCES := $(wildcard src/*.cpp)
-TEST_SOURCES := $(wildcard tests/*.cpp)
+CUDA_SOURCES := $(wildcard src/*.cu)
+TEST_CPP_SOURCES := $(wildcard tests/*.cpp)
+TEST_CUDA_SOURCES := $(wildcard tests/*.cu)		# Add this line
 
 # Output files
-CUDA_OBJECTS := $(addprefix $(OBJ_DIR)/, $(notdir $(CUDA_SOURCES:.cu=.cu.o)))
 CPP_OBJECTS := $(addprefix $(OBJ_DIR)/, $(notdir $(CPP_SOURCES:.cpp=.o)))
-TEST_OBJECTS := $(addprefix $(OBJ_DIR)/, $(notdir $(TEST_SOURCES:.cpp=.o)))
+CUDA_OBJECTS := $(addprefix $(OBJ_DIR)/, $(notdir $(CUDA_SOURCES:.cu=.cu.o)))
+TEST_CPP_OBJECTS := $(addprefix $(OBJ_DIR)/, $(notdir $(TEST_CPP_SOURCES:.cpp=.o)))
+TEST_CUDA_OBJECTS := $(addprefix $(OBJ_DIR)/, $(notdir $(TEST_CUDA_SOURCES:.cu=.cu.o)))		# Add this line
+
+TEST_OBJECTS := $(TEST_CPP_OBJECTS) $(TEST_CUDA_OBJECTS)
 
 # Library names
 LIB_NAME := libmatlib.so
@@ -63,17 +67,21 @@ directories:
 	@mkdir -p $(TEST_DIR)
 
 # Compilation rules
+$(OBJ_DIR)/%.o: src/%.cpp
+	@echo "Compiling $<..."
+	$(CXX) $(CXX_FLAGS) $(INCLUDES) -c $< -o $@
+	
 $(OBJ_DIR)/%.cu.o: src/%.cu
 	@echo "Compiling $<..."
 	$(NVCC) $(NVCC_FLAGS) $(INCLUDES) -c $< -o $@
 
-$(OBJ_DIR)/%.o: src/%.cpp
-	@echo "Compiling $<..."
-	$(CXX) $(CXX_FLAGS) $(INCLUDES) -c $< -o $@
-
 $(OBJ_DIR)/%.o: tests/%.cpp
 	@echo "Compiling $<..."
 	$(CXX) $(CXX_FLAGS) $(TEST_INCLUDES) -c $< -o $@
+
+$(OBJ_DIR)/%.cu.o: tests/%.cu
+		@echo "Compiling CUDA test $<..."
+		$(NVCC) $(NVCC_FLAGS) $(TEST_INCLUDES) -c $< -o $@
 
 # Library targets
 $(LIB_OUTPUT): $(CUDA_OBJECTS) $(CPP_OBJECTS)
@@ -87,7 +95,7 @@ $(STATIC_LIB_OUTPUT): $(CUDA_OBJECTS) $(CPP_OBJECTS)
 # Test targets
 $(TEST_EXECUTABLE): $(TEST_OBJECTS) $(LIB_OUTPUT)
 	@echo "Building tests..."
-	$(CXX) $(CXX_FLAGS) $(TEST_OBJECTS) -o $@ -L$(LIB_DIR) -lmatlib $(TEST_LIBS) $(LIB_PATHS) -lcudart
+	$(NVCC) $(NVCC_FLAGS) $(TEST_OBJECTS) -o $@ -L$(LIB_DIR) -lmatlib $(LIB_PATHS) -lcudart $(TEST_LIBS)
 
 test: $(TEST_EXECUTABLE)
 	@echo "Running tests..."
@@ -103,6 +111,10 @@ install: all
 	cp include/MatLib/*.h include/MatLib/*.cuh $(INSTALL_INCLUDE_PATH)/
 	@echo "Updating library cache..."
 	ldconfig $(INSTALL_LIB_PATH)
+
+sanitize: $(TEST_EXECUTABLE)
+		@echo "Running tests with Compute Sanitizer..."
+		@LD_LIBRARY_PATH=$(LIB_DIR):$(CUDA_PATH)/lib64 compute-sanitizer --tool memcheck ./$(TEST_EXECUTABLE)
 
 # Clean targets
 clean:

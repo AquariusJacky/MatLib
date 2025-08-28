@@ -70,6 +70,7 @@ class Matrix {
   Matrix operator-(const Matrix& matB) const;
   Matrix operator*(const float& scale) const;
   Matrix copy() const { return (*this); }
+  int equal(const Matrix& matB) const;
 
   Matrix& reshape(const size_t& n);
   Matrix& reshape(const size_t& m, const size_t& n);

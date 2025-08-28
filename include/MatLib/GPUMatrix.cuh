@@ -10,6 +10,8 @@
 namespace GPU {
 class Matrix {
  private:
+  static constexpr size_t MAX_TOTAL_ELEMENTS = 1000000;
+
   float* d_data;  // Device data
   size_t m_;
   size_t n_;
@@ -20,6 +22,7 @@ class Matrix {
  public:
   Matrix() : d_data(nullptr), m_(0), n_(0) {}
   Matrix(const size_t m, const size_t n);
+  Matrix(const size_t n);
   Matrix(const CPU::Matrix& cpu_mat);
   Matrix(const Matrix& matB);
   ~Matrix();
@@ -39,18 +42,16 @@ class Matrix {
   Matrix& dot(const Matrix& matB);
   Matrix& scale(const float& scalar);
 
+  int equal(const Matrix& matB) const;
+
   Matrix reduction(const std::string& op) const;
   Matrix max() const { return reduction("max"); }
   Matrix min() const { return reduction("min"); }
   Matrix sum() const { return reduction("sum"); }
 
-  int equal(const Matrix& matB) const;
-
   Matrix& convolution(const Matrix& mask);
   Matrix& maxPooling(const size_t& size);
 };
-
-int testCUDA();
 }  // namespace GPU
 
 #endif

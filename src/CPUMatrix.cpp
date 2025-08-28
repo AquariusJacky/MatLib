@@ -193,6 +193,22 @@ Matrix Matrix::operator*(const float& scale) const {
   return result;
 }
 
+int Matrix::equal(const Matrix& matB) const {
+  if (m_ != matB.m_ || n_ != matB.n_) {
+    return 0;  // Not equal
+  }
+
+  for (size_t i = 0; i < m_; i++) {
+    for (size_t j = 0; j < n_; j++) {
+      if ((*this)(i, j) != matB(i, j)) {
+        return 0;  // Not equal
+      }
+    }
+  }
+
+  return 1;  // Equal
+}
+
 /**
  * @brief Reshapes the matrix to a new size with the same data.
  */

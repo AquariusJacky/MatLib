@@ -9,173 +9,6 @@
 
 namespace GPU {
 
-__global__ void vectorAdd(const float* A, const float* B, float* C,
-                          int numElements) {
-  int i = blockDim.x * blockIdx.x + threadIdx.x;
-
-  if (i < numElements) {
-    C[i] = A[i] + B[i] + 0.0f;
-  }
-}
-
-/**
- * Host main routine
- */
-int testCUDA() {
-  // Error code to check return values for CUDA calls
-  cudaError_t err = cudaSuccess;
-
-  // Print the vector length to be used, and compute its size
-  int numElements = 50000;
-  size_t size = numElements * sizeof(float);
-  printf("[Vector addition of %d elements]\n", numElements);
-
-  // Allocate the host input vector A
-  // float* h_A = (float*)malloc(size);
-  float* h_A = new float[size];
-
-  // Allocate the host input vector B
-  // float* h_B = (float*)malloc(size);
-  float* h_B = new float[size];
-
-  // Allocate the host output vector C
-  // float* h_C = (float*)malloc(size);
-  float* h_C = new float[size];
-
-  // Verify that allocations succeeded
-  if (h_A == NULL || h_B == NULL || h_C == NULL) {
-    fprintf(stderr, "Failed to allocate host vectors!\n");
-    exit(EXIT_FAILURE);
-  }
-
-  // Initialize the host input vectors
-  for (int i = 0; i < numElements; ++i) {
-    h_A[i] = rand() / (float)RAND_MAX;
-    h_B[i] = rand() / (float)RAND_MAX;
-  }
-
-  // Allocate the device input vector A
-  float* d_A = NULL;
-  err = cudaMalloc((void**)&d_A, size);
-
-  if (err != cudaSuccess) {
-    fprintf(stderr, "Failed to allocate device vector A (error code %s)!\n",
-            cudaGetErrorString(err));
-    exit(EXIT_FAILURE);
-  }
-
-  // Allocate the device input vector B
-  float* d_B = NULL;
-  err = cudaMalloc((void**)&d_B, size);
-
-  if (err != cudaSuccess) {
-    fprintf(stderr, "Failed to allocate device vector B (error code %s)!\n",
-            cudaGetErrorString(err));
-    exit(EXIT_FAILURE);
-  }
-
-  // Allocate the device output vector C
-  float* d_C = NULL;
-  err = cudaMalloc((void**)&d_C, size);
-
-  if (err != cudaSuccess) {
-    fprintf(stderr, "Failed to allocate device vector C (error code %s)!\n",
-            cudaGetErrorString(err));
-    exit(EXIT_FAILURE);
-  }
-
-  // Copy the host input vectors A and B in host memory to the device input
-  // vectors in
-  // device memory
-  printf("Copy input data from the host memory to the CUDA device\n");
-  err = cudaMemcpy(d_A, h_A, size, cudaMemcpyHostToDevice);
-
-  if (err != cudaSuccess) {
-    fprintf(stderr,
-            "Failed to copy vector A from host to device (error code %s)!\n",
-            cudaGetErrorString(err));
-    exit(EXIT_FAILURE);
-  }
-
-  err = cudaMemcpy(d_B, h_B, size, cudaMemcpyHostToDevice);
-
-  if (err != cudaSuccess) {
-    fprintf(stderr,
-            "Failed to copy vector B from host to device (error code %s)!\n",
-            cudaGetErrorString(err));
-    exit(EXIT_FAILURE);
-  }
-
-  // Launch the Vector Add CUDA Kernel
-  int threadsPerBlock = 256;
-  int blocksPerGrid = (numElements + threadsPerBlock - 1) / threadsPerBlock;
-  printf("CUDA kernel launch with %d blocks of %d threads\n", blocksPerGrid,
-         threadsPerBlock);
-  vectorAdd<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, numElements);
-  err = cudaGetLastError();
-
-  if (err != cudaSuccess) {
-    fprintf(stderr, "Failed to launch vectorAdd kernel (error code %s)!\n",
-            cudaGetErrorString(err));
-    exit(EXIT_FAILURE);
-  }
-
-  // Copy the device result vector in device memory to the host result vector
-  // in host memory.
-  printf("Copy output data from the CUDA device to the host memory\n");
-  err = cudaMemcpy(h_C, d_C, size, cudaMemcpyDeviceToHost);
-
-  if (err != cudaSuccess) {
-    fprintf(stderr,
-            "Failed to copy vector C from device to host (error code %s)!\n",
-            cudaGetErrorString(err));
-    exit(EXIT_FAILURE);
-  }
-
-  // Verify that the result vector is correct
-  for (int i = 0; i < numElements; ++i) {
-    if (fabs(h_A[i] + h_B[i] - h_C[i]) > 1e-5) {
-      fprintf(stderr, "Result verification failed at element %d!\n", i);
-      exit(EXIT_FAILURE);
-    }
-  }
-
-  printf("Test PASSED\n");
-
-  // Free device global memory
-  err = cudaFree(d_A);
-
-  if (err != cudaSuccess) {
-    fprintf(stderr, "Failed to free device vector A (error code %s)!\n",
-            cudaGetErrorString(err));
-    exit(EXIT_FAILURE);
-  }
-
-  err = cudaFree(d_B);
-
-  if (err != cudaSuccess) {
-    fprintf(stderr, "Failed to free device vector B (error code %s)!\n",
-            cudaGetErrorString(err));
-    exit(EXIT_FAILURE);
-  }
-
-  err = cudaFree(d_C);
-
-  if (err != cudaSuccess) {
-    fprintf(stderr, "Failed to free device vector C (error code %s)!\n",
-            cudaGetErrorString(err));
-    exit(EXIT_FAILURE);
-  }
-
-  // Free host memory
-  free(h_A);
-  free(h_B);
-  free(h_C);
-
-  printf("Done\n");
-  return 0;
-}
-
 Matrix::Matrix(const CPU::Matrix& cpu_mat) : m_(cpu_mat.m_), n_(cpu_mat.n_) {
   allocateDeviceMemory();
 
@@ -186,13 +19,15 @@ Matrix::Matrix(const CPU::Matrix& cpu_mat) : m_(cpu_mat.m_), n_(cpu_mat.n_) {
   if (status != cudaSuccess) {
     std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
     freeDeviceMemory();
-    throw std::runtime_error("Failed to copy data to GPU");
+    throw std::runtime_error("Failed to copy data to GPU in CPU constructor");
   }
 }
 
 Matrix::Matrix(const size_t m, const size_t n) : m_(m), n_(n) {
   allocateDeviceMemory();
 }
+
+Matrix::Matrix(const size_t n) : m_(1), n_(n) { allocateDeviceMemory(); }
 
 Matrix::Matrix(const Matrix& matB) : m_(matB.m_), n_(matB.n_) {
   allocateDeviceMemory();
@@ -204,7 +39,7 @@ Matrix::Matrix(const Matrix& matB) : m_(matB.m_), n_(matB.n_) {
   if (status != cudaSuccess) {
     std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
     freeDeviceMemory();
-    throw std::runtime_error("Failed to copy data to GPU");
+    throw std::runtime_error("Failed to copy data to GPU in copy constructor");
   }
 }
 
@@ -215,21 +50,39 @@ Matrix::~Matrix() {
 }
 
 void Matrix::allocateDeviceMemory() {
+  freeDeviceMemory();
+  if (m_ * n_ > MAX_TOTAL_ELEMENTS) {
+    throw std::runtime_error(
+        "Matrix size exceeds maximum allowed elements in allocateDeviceMemory");
+  }
   if (m_ * n_ > 0) {
     cudaError_t status = cudaMalloc(&d_data, m_ * n_ * sizeof(float));
 
     if (status != cudaSuccess) {
       std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
-      throw std::runtime_error("Failed to allocate GPU memory");
+      throw std::runtime_error(
+          "Failed to allocate GPU memory in allocateDeviceMemory");
     }
   }
 }
 
 void Matrix::freeDeviceMemory() {
-  if (d_data) {
-    cudaFree(d_data);
-    d_data = nullptr;
+  cudaPointerAttributes attributes;
+  cudaError_t status = cudaPointerGetAttributes(&attributes, d_data);
+  if (status != cudaSuccess) {
+    std::cout << "Invalid pointer: " << cudaGetErrorString(status) << std::endl;
+    cudaGetLastError();  // Clear error
   }
+
+  if (attributes.type == cudaMemoryTypeUnregistered) return;
+
+  status = cudaFree(d_data);
+
+  if (status != cudaSuccess) {
+    std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
+    throw std::runtime_error("Failed to free GPU memory in freeDeviceMemory");
+  }
+  d_data = nullptr;
 }
 
 void Matrix::toCPU(CPU::Matrix& cpu_mat) {
@@ -240,13 +93,14 @@ void Matrix::toCPU(CPU::Matrix& cpu_mat) {
 
   if (status != cudaSuccess) {
     std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
-    throw std::runtime_error("Failed to copy data back to CPU");
+    freeDeviceMemory();
+    throw std::runtime_error("Failed to copy data back to CPU in toCPU");
   }
 }
 
 Matrix& Matrix::operator=(const Matrix& matB) {
-  freeDeviceMemory();
-
+  if (this == &matB) return (*this);  // Handle self-assignment
+  
   m_ = matB.m_;
   n_ = matB.n_;
 
@@ -259,10 +113,115 @@ Matrix& Matrix::operator=(const Matrix& matB) {
   if (status != cudaSuccess) {
     std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
     freeDeviceMemory();
-    throw std::runtime_error("Failed to copy data to GPU");
+    throw std::runtime_error(
+        "Failed to copy data to GPU in assignment operator");
   }
 
   return (*this);
+}
+
+// Example CUDA kernel for matrix multiplication
+__global__ void matrixEqualKernel(float* A, float* B, int* result, size_t m,
+                                  size_t n) {
+  int row = blockIdx.y * blockDim.y + threadIdx.y;
+  int col = blockIdx.x * blockDim.x + threadIdx.x;
+
+  if (row < m && col < n) {
+    int index = row * n + col;
+
+    // If any element is different, set result to 0 (false)
+    if (A[index] != B[index]) {
+      atomicExch(result, 0);
+    }
+  }
+}
+
+int Matrix::equal(const Matrix& matB) const {
+  size_t m = m_, n = n_;
+
+  if (matB.m_ != m || matB.n_ != n) return 0;
+  if (m * n == 0) return 1;
+
+  // Set up grid and block dimensions
+  dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
+  dim3 dimGrid((n + BLOCK_SIZE - 1) / BLOCK_SIZE, 
+               (m + BLOCK_SIZE - 1) / BLOCK_SIZE);
+
+  int* d_result;  // Assume equal initially
+  cudaMalloc(&d_result, sizeof(int));
+  int initial_value = 1;
+  cudaMemcpy(d_result, &initial_value, sizeof(int), cudaMemcpyHostToDevice);
+
+  // Launch kernel
+  matrixEqualKernel<<<dimGrid, dimBlock>>>(d_data, matB.d_data, d_result, m, n);
+
+  // Check for errors
+  cudaError_t status = cudaGetLastError();
+  if (status != cudaSuccess) {
+    std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
+    throw std::runtime_error("Kernel launch failed in equal");
+  }
+
+  // Synchronize
+  status = cudaDeviceSynchronize();
+  if (status != cudaSuccess) {
+    std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
+    throw std::runtime_error("Device synchronization failed in equal");
+  }
+
+  int h_result;
+  cudaMemcpy(&h_result, d_result, sizeof(int), cudaMemcpyDeviceToHost);
+  cudaFree(d_result);
+
+  return h_result;
+}
+
+// CUDA kernel for filling a matrix with a constant value
+__global__ void matrixFillKernel(float* A, const float val, size_t m, size_t n) {
+    // Calculate global thread indices
+    size_t row = blockIdx.y * blockDim.y + threadIdx.y;
+    size_t col = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    // Check bounds
+    if (row < m && col < n) {
+        size_t idx = row * n + col;  // Row-major indexing
+        A[idx] = val;
+            }
+}
+
+Matrix& Matrix::fill(const float& val) {
+    if (m_ * n_ == 0) return *this;  // Handle empty matrix case
+    if (d_data == nullptr) {
+        throw std::runtime_error("Device memory not allocated in fill");
+    }
+
+    size_t m = m_, n = n_;
+
+    // Use 2D grid configuration (corrected from your comment about 1D)
+    dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
+    
+    // Calculate grid dimensions - need to round up to cover all elements
+    dim3 dimGrid((n + BLOCK_SIZE - 1) / BLOCK_SIZE, 
+                 (m + BLOCK_SIZE - 1) / BLOCK_SIZE);
+
+    // Launch kernel with 2D configuration
+    matrixFillKernel<<<dimGrid, dimBlock>>>(d_data, val, m, n);
+
+    // Check for errors
+    cudaError_t status = cudaGetLastError();
+    if (status != cudaSuccess) {
+        std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
+        throw std::runtime_error("Kernel launch failed in fill");
+    }
+
+    // Synchronize
+    status = cudaDeviceSynchronize();
+    if (status != cudaSuccess) {
+        std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
+        throw std::runtime_error("Device synchronization failed in fill");
+    }
+
+    return *this;
 }
 
 // Example CUDA kernel for matrix multiplication
@@ -291,59 +250,19 @@ Matrix& Matrix::scale(const float& scalar) {
   cudaError_t status = cudaGetLastError();
   if (status != cudaSuccess) {
     std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
-    throw std::runtime_error("Kernel launch failed");
+    throw std::runtime_error("Kernel launch failed in scale");
   }
 
   // Synchronize
   status = cudaDeviceSynchronize();
   if (status != cudaSuccess) {
     std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
-    throw std::runtime_error("Device synchronization failed");
+    throw std::runtime_error("Device synchronization failed in scale");
   }
 
   return (*this);
 }
 
-// Example CUDA kernel for matrix multiplication
-__global__ void matrixFillKernel(float* A, const float val, size_t m,
-                                 size_t n) {
-  size_t row = blockIdx.x * blockDim.x + threadIdx.x;
-  size_t col = blockIdx.y * blockDim.y + threadIdx.y;
-
-  if (row < m && col < n) {
-    A[row * n + col] = val;
-  }
-}
-
-Matrix& Matrix::fill(const float& val) {
-  size_t m = m_, n = n_;
-
-  // Set up grid and block dimensions
-  dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
-  dim3 dimGrid((m + dimBlock.x - 1) / dimBlock.x,
-               (n + dimBlock.y - 1) / dimBlock.y);
-
-  // Launch kernel
-  matrixFillKernel<<<dimGrid, dimBlock>>>(d_data, val, m, n);
-
-  // Check for errors
-  cudaError_t status = cudaGetLastError();
-  if (status != cudaSuccess) {
-    std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
-    throw std::runtime_error("Kernel launch failed");
-  }
-
-  // Synchronize
-  status = cudaDeviceSynchronize();
-  if (status != cudaSuccess) {
-    std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
-    throw std::runtime_error("Device synchronization failed");
-  }
-
-  return (*this);
-}
-
-// Example CUDA kernel for matrix multiplication
 __global__ void addKernel(const float* A, const float* B, float* output,
                           size_t m, size_t n) {
   size_t row = blockIdx.x * blockDim.x + threadIdx.x;
@@ -359,7 +278,7 @@ Matrix& Matrix::add(const Matrix& matB) {
   size_t m = m_, n = n_;
 
   if (matB.m_ != m || matB.n_ != n) {
-    throw std::runtime_error("Size of A does not match size of B");
+    throw std::runtime_error("Size of A does not match size of B in add");
   }
 
   // Set up grid and block dimensions
@@ -376,7 +295,7 @@ Matrix& Matrix::add(const Matrix& matB) {
   cudaError_t status = cudaGetLastError();
   if (status != cudaSuccess) {
     std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
-    throw std::runtime_error("Kernel launch failed");
+    throw std::runtime_error("Kernel launch failed in add");
   }
 
   return (*this) = result;
@@ -427,7 +346,7 @@ Matrix& Matrix::dot(const Matrix& matB) {
   size_t m = m_, k = n_, n = matB.n_;
 
   if (matB.m_ != k) {
-    throw std::runtime_error("col # of A doesn't match row # of B");
+    throw std::runtime_error("col # of A doesn't match row # of B in dot");
   }
 
   Matrix result(m, n);
@@ -444,7 +363,7 @@ Matrix& Matrix::dot(const Matrix& matB) {
   cudaError_t status = cudaGetLastError();
   if (status != cudaSuccess) {
     std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
-    throw std::runtime_error("Kernel launch failed");
+    throw std::runtime_error("Kernel launch failed in dot");
   }
 
   return (*this) = result;
@@ -460,13 +379,13 @@ __global__ void reductionMaxKernel(float* input, float* output, int len) {
   if (start + t < len)
     partialSum[t] = input[start + t];
   else
-    partialSum[t] = 0;
+    partialSum[t] = -INFINITY;
 
   // Load second block of elements into shared memory
   if (start + t + blockDim.x < len)
     partialSum[t + blockDim.x] = input[start + t + blockDim.x];
   else
-    partialSum[t + blockDim.x] = 0;
+    partialSum[t + blockDim.x] = -INFINITY;
 
   // Sync threads to ensure all data is loaded
   __syncthreads();
@@ -494,21 +413,21 @@ __global__ void reductionMinKernel(float* input, float* output, int len) {
   if (start + t < len)
     partialSum[t] = input[start + t];
   else
-    partialSum[t] = 0;
+    partialSum[t] = INFINITY;
 
   // Load second block of elements into shared memory
   if (start + t + blockDim.x < len)
     partialSum[t + blockDim.x] = input[start + t + blockDim.x];
   else
-    partialSum[t + blockDim.x] = 0;
+    partialSum[t + blockDim.x] = INFINITY;
 
   // Sync threads to ensure all data is loaded
   __syncthreads();
 
   for (size_t stride = blockDim.x; stride >= 1; stride >>= 1) {
     if (t < stride) {
-      // Compare and keep the maximum
-      // If the next element is larger, replace the current one
+      // Compare and keep the minimum
+      // If the next element is smaller, replace the current one
       if (partialSum[t + stride] < partialSum[t])
         partialSum[t] = partialSum[t + stride];
     }
@@ -550,6 +469,11 @@ __global__ void reductionSumKernel(float* input, float* output, int len) {
 }
 
 Matrix Matrix::reduction(const std::string& op) const {
+
+  if (m_ * n_ == 0) {
+    throw std::runtime_error("Cannot reduce an empty matrix");
+  }
+
   dim3 dimBlock(BLOCK_SIZE);
   // Number of blocks needed
   // Each block will handle 2 * BLOCK_SIZE * BLOCK_SIZE elements
@@ -566,20 +490,20 @@ Matrix Matrix::reduction(const std::string& op) const {
   } else if (op == "sum") {
     reductionSumKernel<<<dimGrid, dimBlock>>>(d_data, results.d_data, m_ * n_);
   } else {
-    throw std::runtime_error("Unsupported reduction operation");
+    throw std::runtime_error("Unsupported reduction operation in reduction");
   }
 
   status = cudaGetLastError();
   if (status != cudaSuccess) {
     std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
-    throw std::runtime_error("Reduce Kernel launch failed");
+    throw std::runtime_error("Reduce Kernel launch failed in reduction");
   }
 
   // Synchronize
   status = cudaDeviceSynchronize();
   if (status != cudaSuccess) {
     std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
-    throw std::runtime_error("Device synchronization failed");
+    throw std::runtime_error("Device synchronization failed in reduction");
   }
   Matrix finalResult(1);
 
@@ -596,20 +520,20 @@ Matrix Matrix::reduction(const std::string& op) const {
       reductionSumKernel<<<1, dimBlock>>>(results.d_data, finalResult.d_data,
                                           dimGrid.x);
     } else {
-      throw std::runtime_error("Unsupported reduction operation");
+      throw std::runtime_error("Unsupported reduction operation in reduction");
     }
 
     status = cudaGetLastError();
     if (status != cudaSuccess) {
       std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
-      throw std::runtime_error("Reduce Kernel launch failed");
+      throw std::runtime_error("Reduce Kernel launch failed in second reduction");
     }
 
     // Synchronize
     status = cudaDeviceSynchronize();
     if (status != cudaSuccess) {
       std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
-      throw std::runtime_error("Device synchronization failed");
+      throw std::runtime_error("Device synchronization failed in reduction");
     }
   }
 
@@ -645,7 +569,7 @@ Matrix& Matrix::convolution(const Matrix& mask) {
   size_t m = m_, n = n_, k = mask.m_;
 
   if (mask.n_ != k) {
-    throw std::runtime_error("Mask is not a square matrix");
+    throw std::runtime_error("Mask is not a square matrix in convolution");
   }
 
   size_t out_m = m - k + 1;
@@ -666,7 +590,7 @@ Matrix& Matrix::convolution(const Matrix& mask) {
   cudaError_t status = cudaGetLastError();
   if (status != cudaSuccess) {
     std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
-    throw std::runtime_error("Kernel launch failed");
+    throw std::runtime_error("Kernel launch failed in convolution");
   }
 
   return (*this) = result;
@@ -714,7 +638,7 @@ Matrix& Matrix::maxPooling(const size_t& size) {
   cudaError_t status = cudaGetLastError();
   if (status != cudaSuccess) {
     std::cerr << "Error: " << cudaGetErrorString(status) << std::endl;
-    throw std::runtime_error("Kernel launch failed");
+    throw std::runtime_error("Kernel launch failed in maxPooling");
   }
 
   return (*this) = result;
